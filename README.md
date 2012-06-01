@@ -2,7 +2,8 @@ psyonik-upnp
 ==========
 
 Scala implementation of uPnP library.
-This library was derived from the Java library [weupnp](http://code.google.com/p/weupnp/)
+This library was derived from the Java library [weupnp](http://code.google.com/p/weupnp/).
+Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 
 Example:
 
