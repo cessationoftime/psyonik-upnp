@@ -196,10 +196,10 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def addPortMapping(externalPort: Int, internalPort: Int,
-    internalClient: String, protocol: String, description: String): Boolean = {
+    internalClient: String, protocol: String, description: String, leaseDuration: Int = 0): Boolean = {
     //TODO: Print out if controlUrl or ServiceType are None.
     (controlURL, serviceType) match {
-      case (Some(controlURLValue), Some(serviceTypeValue)) => {
+      case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map("NewRemoteHost" -> "", //wildcard, any remote host matches
           "NewExternalPort" -> Integer.toString(externalPort),
           "NewProtocol" -> protocol,
@@ -207,16 +207,13 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
           "NewInternalClient" -> internalClient,
           "NewEnabled" -> Integer.toString(1),
           "NewPortMappingDescription" -> description,
-          "NewLeaseDuration" -> Integer.toString(0));
+          "NewLeaseDuration" -> Integer.toString(leaseDuration));
 
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, AddPortMapping, args);
-
-        return nameValue.get("errorCode") == null;
-      }
-      case (_) => {
-        return false;
-      }
+		  
+        nameValue.get("errorCode").isEmpty
+      case _ => false;
     }
   }
 
@@ -307,45 +304,27 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     //Combine the two methods to a degree?
 
     (controlURL, serviceType) match {
-      case (Some(controlURLValue), Some(serviceTypeValue)) => {
+      case (Some(controlURLValue), Some(serviceTypeValue)) =>
         var args: Map[String, String] = Map("NewPortMappingIndex" -> Integer.toString(index));
 
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetGenericPortMappingEntry, args);
 
         if (nameValue.isEmpty || nameValue.contains("errorCode"))
-          return false;
+		return false;
 
         portMappingEntry.remoteHost = nameValue.get("NewRemoteHost");
         portMappingEntry.internalClient = nameValue.get("NewInternalClient");
         portMappingEntry.protocol = nameValue.get("NewProtocol");
         portMappingEntry.enabled = nameValue.get("NewEnabled");
-        portMappingEntry.portMappingDescription = (
-          nameValue.get("NewPortMappingDescription"));
-
-        //TODO: Do we really need to two tries here if they catch the same exception?
-        //Moreover, we should probably actually do something with the exception.
-        //What we do with that exception will determine if we need two tries.
-
-        try {
-          portMappingEntry.internalPort =
-            Some(nameValue.get("NewInternalPort").get.toInt);
-        } catch {
-          case (e: Exception) =>
-            println(e);
-        }
-        try {
-          portMappingEntry.externalPort =
-            Some(nameValue.get("NewExternalPort").get.toInt);
-        } catch {
-          case (e: Exception) =>
-            println(e);
-        }
+        portMappingEntry.portMappingDescription = nameValue.get("NewPortMappingDescription");
+        portMappingEntry.internalPort = nameValue.get("NewInternalPort") map (_.toInt);
+        portMappingEntry.externalPort = nameValue.get("NewExternalPort") map (_.toInt);
+        
         return true;
-      }
-      case (_) => {
-        return false;
-      }
+
+      case _ => false;
+      
     }
   }
 
@@ -360,27 +339,13 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[SAXException])
   def getPortMappingNumberOfEntries(): Int = {
     (controlURL, serviceType) match {
-      case (Some(controlURLValue), Some(serviceTypeValue)) => {
+      case (Some(controlURLValue), Some(serviceTypeValue)) => 
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetPortMappingNumberOfEntries);
 
-        var portMappingNumber: Int = 0;
-
-        try {
           //This originally used Integer.valueOf. Not sure if .toInt will mess it up.
-          portMappingNumber =
-            nameValue.get("NewPortMappingNumberOfEntries").get.toInt;
-        } catch {
-          case (e: Exception) =>
-            println(e);
-            return 0;
-        }
-
-        return portMappingNumber;
-      }
-      case (_) => {
-        return 0;
-      }
+            nameValue.get("NewPortMappingNumberOfEntries").getOrElse("0").toInt;
+      case _ =>  0      
     }
   }
 
@@ -400,18 +365,14 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     //It just kind of returns true if it tried to do it.
     (controlURL, serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
-        {
           val args: Map[String, String] = Map(
             "NewRemoteHost" -> "",
             "NewExternalPort" -> Integer.toString(externalPort),
             "NewProtocol" -> protocol);
           val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
             serviceTypeValue, DeletePortMapping, args);
-          return true;
-        }
-      case (_) => {
-        return false;
-      }
+          true;
+      case _ => false;
     }
   }
 

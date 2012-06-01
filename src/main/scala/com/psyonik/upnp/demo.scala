@@ -96,5 +96,5 @@ object Main extends App {
         println("Port mapping removal FAILED");
     }
   }
-  println("Stopping weupnp");
+  println("Stopping psyonik-upnp");
 }
