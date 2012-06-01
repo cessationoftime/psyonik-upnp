@@ -1,4 +1,4 @@
-upnp-scala
+psyonik-upnp
 ==========
 
-scala implementation of uPnP
+scala implementation of uPnP client.
