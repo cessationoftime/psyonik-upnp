@@ -14,7 +14,6 @@ import java.lang.Thread
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.util.control.Breaks.break
 import scala.util.control.Breaks.breakable
-import com.psyonik.upnp.GatewayDiscover.FindValidGatewayDevice._
 object Main extends App {
   val SAMPLE_PORT = 6991;
   val WAIT_TIME = 10;
@@ -53,7 +52,7 @@ object Main extends App {
   activeGWOption match {
   case Some(gw) =>println("Using gateway: " + gw.friendlyName);
   case None =>  println("No active gateway device found");
-  println("exiting");
+	println("exiting");
 	sys.exit();
   }
   val activeGW = activeGWOption.get;
