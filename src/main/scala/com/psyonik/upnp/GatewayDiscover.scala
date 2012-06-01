@@ -22,7 +22,7 @@ import java.net.Inet6Address
 import java.util.StringTokenizer
 import util.control.Breaks._
 import scala.collection.parallel.immutable.ParMap
-import com.psyonik.upnp.GatewayDiscover.FindValidGatewayDevice.GatewayDeviceMap
+import com.psyonik.upnp.GatewayDiscover.GatewayDeviceMap
 /** Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnpscala.GatewayDiscover#discover()} method.
   */
 object GatewayDiscover {
@@ -250,13 +250,10 @@ object GatewayDiscover {
     if (sortIPv4BeforeIPv6) filteredAddresses sortWith IPv4BeforeIPv6 else filteredAddresses
   }
 
-  object FindValidGatewayDevice {
-    //implicitly convert Map[InetAddress, GatewayDevice] to GatewayDeviceMap
-    implicit def map2GatewayDeviceMap(o: Map[InetAddress, GatewayDevice]): GatewayDeviceMap = new GatewayDeviceMap(o)
-	implicit def gatewayDeviceMap2Map(o: GatewayDeviceMap): Map[InetAddress, GatewayDevice] = o.devices
+  
 
     //wrap Map[InetAddress, GatewayDevice] with the getValidGateway function
-    class GatewayDeviceMap private[FindValidGatewayDevice] (val devices: Map[InetAddress, GatewayDevice]) {
+    class GatewayDeviceMap private[upnp] (val devices: Map[InetAddress, GatewayDevice]) {
       /** Gets the first connected gateway
         *
         * @return the first GatewayDevice which is connected to the network, or None
@@ -267,5 +264,4 @@ object GatewayDiscover {
 
       }
     }
-  }
 }
