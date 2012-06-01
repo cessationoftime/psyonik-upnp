@@ -1,0 +1,15 @@
+target/
+project/boot/
+project/target/
+project/plugins/target/
+project/project/boot/
+project/project/target/
+.target/
+*.jar
+*.class
+*.lock
+*.log
+.cache
+.project
+.classpath
+.settings/
