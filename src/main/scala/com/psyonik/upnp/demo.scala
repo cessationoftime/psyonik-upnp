@@ -12,7 +12,7 @@ object Main extends App {
   var counter = 0;
 
   //The printlns here are supposed to be AddLogline(string), but I can't find them.
-  println("Starting weupnp");
+  println("Starting psyonik-upnp");
  // val gatewayDiscover = new GatewayDiscover();
 
   println("Looking for Gateway Devices...");
