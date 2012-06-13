@@ -217,6 +217,20 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     }
   }
 
+  private def portQueryToPortMappingEntry(nameValue: Map[String, String]) : Option[PortMappingEntry] = {
+   if (nameValue.isEmpty || nameValue.contains("errorCode"))
+		return None;
+  
+  	Some(PortMappingEntry(
+	nameValue.get("NewInternalPort") map (_.toInt),
+	nameValue.get("NewExternalPort") map (_.toInt),
+	nameValue.get("NewRemoteHost"),
+	nameValue.get("NewInternalClient"),
+    nameValue.get("NewProtocol"),
+    nameValue.get("NewEnabled"),
+    nameValue.get("NewPortMappingDescription")));
+  }
+  
   /** Queries the GatewayDevice to retrieve a specific port mapping entry,
     * corresponding to specified criteria, if present.
     * <p/>
@@ -225,9 +239,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     *
     * @param externalPort     the external port
     * @param protocol         the protocol (TCP or UDP)
-    * @param portMappingEntry the entry containing the details, in any is
-    * present, <i>null</i> otherwise. <i>(used as return value)</i>
-    * @return true if a valid mapping is found
+    * @return Some(PortMappingEntry) if a valid mapping is found, else None
     * @throws IOException
     * @throws SAXException
     * @todo consider refactoring this method to make it consistent with
@@ -239,12 +251,10 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def getSpecificPortMappingEntry(externalPort: Int,
-    protocol: String, portMappingEntry: PortMappingEntry): Boolean = {
+    protocol: String): Option[PortMappingEntry] = {
+	
     (controlURL, serviceType) match {
-      case (Some(controlURLValue), Some(serviceTypeValue)) => {
-        portMappingEntry.externalPort = Some(externalPort);
-        portMappingEntry.protocol = Some(protocol);
-
+      case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map(
           "NewRemoteHost" -> "", // wildcard, any remote host matches
           "NewExternalPort" -> Integer.toString(externalPort),
@@ -253,41 +263,20 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetSpecificPortMappingEntry, args);
 
-        if (nameValue.isEmpty || nameValue.contains("errorCode"))
-          return false;
-
-        if (!nameValue.contains("NewInternalClient") ||
-          !nameValue.contains("NewInternalPort"))
-          return false;
-
-        portMappingEntry.protocol = nameValue.get("NewProtocol");
-        portMappingEntry.enabled = (nameValue.get("NewEnabled"));
-        portMappingEntry.internalClient = (nameValue.get("NewInternalClient"));
-        portMappingEntry.externalPort = Some(externalPort);
-        portMappingEntry.portMappingDescription = nameValue.get("NewPortMappingDescription");
-        portMappingEntry.remoteHost = nameValue.get("NewRemoteHost");
-
-        try {
-          //TODO: Make this not use .get in the option.
-          portMappingEntry.internalPort = Some(nameValue.get("NewInternalPort").get.toInt);
-        } catch {
-          case (e: NumberFormatException) =>
-          // skip bad port
-        }
-        return true;
-      }
-      case (_) => {
-        return false;
-      }
+        if (!nameValue.contains("NewInternalClient") || !nameValue.contains("NewInternalPort")) {
+           None;
+		  } else {
+		  portQueryToPortMappingEntry(nameValue)
+		}
+      case _ => None;
+      
     }
   }
 
   /** Returns a specific port mapping entry, depending on a the supplied index.
     *
     * @param index            the index of the desired port mapping
-    * @param portMappingEntry the entry containing the details, in any is
-    * present, <i>null</i> otherwise. <i>(used as return value)</i>
-    * @return true if a valid mapping is found
+    * @return Some(PortMappingEntry) if a valid mapping is found, else None
     * @throws IOException
     * @throws SAXException
     * @todo consider refactoring this method to make it consistent with
@@ -298,7 +287,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
-  def getGenericPortMappingEntry(index: Int, portMappingEntry: PortMappingEntry): Boolean = {
+  def getGenericPortMappingEntry(index: Int): Option[PortMappingEntry] = {
 
     //TODO: There appears to be a lot of reuse from getSpecificPortMappingEntry.
     //Combine the two methods to a degree?
@@ -310,20 +299,9 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetGenericPortMappingEntry, args);
 
-        if (nameValue.isEmpty || nameValue.contains("errorCode"))
-		return false;
+		portQueryToPortMappingEntry(nameValue)
 
-        portMappingEntry.remoteHost = nameValue.get("NewRemoteHost");
-        portMappingEntry.internalClient = nameValue.get("NewInternalClient");
-        portMappingEntry.protocol = nameValue.get("NewProtocol");
-        portMappingEntry.enabled = nameValue.get("NewEnabled");
-        portMappingEntry.portMappingDescription = nameValue.get("NewPortMappingDescription");
-        portMappingEntry.internalPort = nameValue.get("NewInternalPort") map (_.toInt);
-        portMappingEntry.externalPort = nameValue.get("NewExternalPort") map (_.toInt);
-        
-        return true;
-
-      case _ => false;
+      case _ => None;
       
     }
   }
