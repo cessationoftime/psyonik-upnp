@@ -8,7 +8,7 @@ import scala.util.control.Breaks.breakable
 object Main extends App {
   val SAMPLE_PORT = 6991;
   val WAIT_TIME = 10;
-  val LISTALLMAPPINGS = false;
+  val LISTALLMAPPINGS = true;
   var counter = 0;
 
   //The printlns here are supposed to be AddLogline(string), but I can't find them.
@@ -50,14 +50,14 @@ object Main extends App {
 
   val portMapCount = activeGW.getPortMappingNumberOfEntries();
   println("GetPortMappingNumberOfEntries=" + (if (portMapCount != 0) portMapCount.toString else "(unsupported)"));
-
+  
     if (LISTALLMAPPINGS) {
     var pmCount = 0;
     breakable {
       while (true) {
 		activeGW.getGenericPortMappingEntry(pmCount) match {
 			case Some(portMapping) => 
-				println("Portmapping #" + pmCount + " successfully retrieved (" + portMapping.portMappingDescription + ":" + portMapping.externalPort + ")");
+				println("Portmapping #" + pmCount + " successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
 			case None =>
 				println("Portmapping #" + pmCount + " retrival failed");
 				break;
@@ -67,7 +67,7 @@ object Main extends App {
     }
   } else {
 	activeGW.getGenericPortMappingEntry(0) match {
-		case Some(portMapping) => println("Portmapping #0 successfully retrieved (" + portMapping.portMappingDescription + ":" + portMapping.externalPort + ")");
+		case Some(portMapping) => println("Portmapping #0 successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
 		case None => println("Portmapping #0 retrival failed");
 	}         
   }
