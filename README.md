@@ -9,7 +9,6 @@ Example:
 
 ```scala
 import com.psyonik.upnp._
-
 import java.lang.Thread
 
 import scala.collection.JavaConversions.mapAsScalaMap
@@ -23,8 +22,7 @@ object Main extends App {
 
   //The printlns here are supposed to be AddLogline(string), but I can't find them.
   println("Starting psyonik-upnp");
- // val gatewayDiscover = new GatewayDiscover();
-
+ 
   println("Looking for Gateway Devices...");
 
   val gateways = GatewayDiscover();
@@ -34,7 +32,7 @@ object Main extends App {
     println("Stopping weupnp");
     sys.exit();
   }
-  println(gateways.size + "gateway(s) found");
+  println(gateways.size + " gateway(s) found");
   gateways foreach {
     case (key, gw) =>
       {
@@ -61,25 +59,25 @@ object Main extends App {
   val portMapCount = activeGW.getPortMappingNumberOfEntries();
   println("GetPortMappingNumberOfEntries=" + (if (portMapCount != 0) portMapCount.toString else "(unsupported)"));
 
-  val portMapping0 = new PortMappingEntry();
-  if (LISTALLMAPPINGS) {
+    if (LISTALLMAPPINGS) {
     var pmCount = 0;
     breakable {
-      do {
-        if (activeGW.getGenericPortMappingEntry(pmCount, portMapping0))
-          println("Portmapping #" + pmCount + " successfully retrieved (" + portMapping0.portMappingDescription + ":" + portMapping0.externalPort + ")");
-        else {
-          println("Portmapping #" + pmCount + " retrival failed");
-          break;
+      while (true) {
+		activeGW.getGenericPortMappingEntry(pmCount) match {
+			case Some(portMapping) => 
+				println("Portmapping #" + pmCount + " successfully retrieved (" + portMapping.portMappingDescription + ":" + portMapping.externalPort + ")");
+			case None =>
+				println("Portmapping #" + pmCount + " retrival failed");
+				break;
         }
         pmCount += 1;
-      } while (portMapping0 != null);
+      }
     }
   } else {
-    if (activeGW.getGenericPortMappingEntry(0, portMapping0))
-      println("Portmapping #0 successfully retrieved (" + portMapping0.portMappingDescription + ":" + portMapping0.externalPort + ")");
-    else
-      println("Portmapping #0 retrival failed");
+	activeGW.getGenericPortMappingEntry(0) match {
+		case Some(portMapping) => println("Portmapping #0 successfully retrieved (" + portMapping.portMappingDescription + ":" + portMapping.externalPort + ")");
+		case None => println("Portmapping #0 retrival failed");
+	}         
   }
 
   val localAddress = activeGW.localAddress;
@@ -88,19 +86,19 @@ object Main extends App {
   println("External address: " + externalIPAddress);
 
   println("Querying device to see if a port mapping already exists for port: " + SAMPLE_PORT);
-  val portMapping = new PortMappingEntry();
 
-  if (activeGW.getSpecificPortMappingEntry(SAMPLE_PORT, "TCP", portMapping)) {
-    println("Port " + SAMPLE_PORT + " is already mapped. Aborting test.");
+  activeGW.getSpecificPortMappingEntry(SAMPLE_PORT, "TCP") match {
+   case Some(_) => 
+     println("Port " + SAMPLE_PORT + " is already mapped. Aborting test.");
     sys.exit();
-  } else {
-    println("Mapping free. Sending port mapping request for port " + SAMPLE_PORT);
+	case None =>
+	println("Mapping free. Sending port mapping request for port " + SAMPLE_PORT);
 
     if (activeGW.addPortMapping(SAMPLE_PORT, SAMPLE_PORT, localAddress.get.getHostAddress(), "TCP", "test")) {
       println("Mapping Successful. Waiting " + WAIT_TIME + " seconds before removing mapping...");
       Thread.sleep(1009 * WAIT_TIME);
 
-      if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP") == true)
+      if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP"))
         println("Port mapping removed, test SUCCESSFUL");
       else
         println("Port mapping removal FAILED");
