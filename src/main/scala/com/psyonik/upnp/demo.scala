@@ -59,7 +59,7 @@ object Main extends App {
 			case Some(portMapping) => 
 				println("Portmapping #" + pmCount + " successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
 			case None =>
-				println("Portmapping #" + pmCount + " retrival failed");
+				println("Portmapping #" + pmCount + " retrieval failed");
 				break;
         }
         pmCount += 1;
@@ -80,7 +80,7 @@ object Main extends App {
   println("Querying device to see if a port mapping already exists for port: " + SAMPLE_PORT);
 
   activeGW.getSpecificPortMappingEntry(SAMPLE_PORT, "TCP") match {
-   case Some(_) => 
+   case Some(portMapping) => 
      println("Port " + SAMPLE_PORT + " is already mapped. Aborting test.");
     sys.exit();
 	case None =>
@@ -90,10 +90,10 @@ object Main extends App {
       println("Mapping Successful. Waiting " + WAIT_TIME + " seconds before removing mapping...");
       Thread.sleep(1009 * WAIT_TIME);
 
-      if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP"))
-        println("Port mapping removed, test SUCCESSFUL");
-      else
-        println("Port mapping removal FAILED");
+     // if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP"))
+     //   println("Port mapping removed, test SUCCESSFUL");
+     // else
+     //   println("Port mapping removal FAILED");
     }
   }
   println("Stopping psyonik-upnp");

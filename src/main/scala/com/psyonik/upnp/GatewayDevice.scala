@@ -205,7 +205,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
           "NewProtocol" -> protocol,
           "NewInternalPort" -> Integer.toString(internalPort),
           "NewInternalClient" -> internalClient,
-          "NewEnabled" -> Integer.toString(1),
+          "NewEnabled" -> "1",
           "NewPortMappingDescription" -> description,
           "NewLeaseDuration" -> Integer.toString(leaseDuration));
 
@@ -220,7 +220,6 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   private def portQueryToPortMappingEntry(nameValue: Map[String, String]) : Option[PortMappingEntry] = {
    if (nameValue.isEmpty || nameValue.contains("errorCode"))
 		return None;
-  
   	Some(PortMappingEntry(
 	nameValue.get("NewInternalPort") map (_.toInt),
 	nameValue.get("NewExternalPort") map (_.toInt),
@@ -266,7 +265,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
         if (!nameValue.contains("NewInternalClient") || !nameValue.contains("NewInternalPort")) {
            None;
 		  } else {
-		  portQueryToPortMappingEntry(nameValue)
+		  portQueryToPortMappingEntry(args ++ nameValue)
 		}
       case _ => None;
       
