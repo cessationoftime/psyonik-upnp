@@ -232,6 +232,12 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   def getAllPortMappingEntriesOf(description: String) = {
     getAllPortMappingEntries filter (_.portMappingDescription == Some(description))
   }
+  def getAllPortMappingEntriesOf(internalClientAddress: InetAddress) = {
+    getAllPortMappingEntries filter (_.internalClient == Some(internalClientAddress.getHostAddress))
+  }
+  def getAllPortMappingEntriesOf(internalClientAddress: InetAddress, description: String) = {
+    getAllPortMappingEntries filter (e => e.internalClient == Some(internalClientAddress.getHostAddress) && e.portMappingDescription == Some(description))
+  }
 
   def getAllPortMappingEntries = {
     def looped(entries: List[PortMappingEntry] = Nil): List[PortMappingEntry] = {
