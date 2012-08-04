@@ -13,7 +13,7 @@ object Main extends App {
 
   //The printlns here are supposed to be AddLogline(string), but I can't find them.
   println("Starting psyonik-upnp");
- // val gatewayDiscover = new GatewayDiscover();
+  // val gatewayDiscover = new GatewayDiscover();
 
   println("Looking for Gateway Devices...");
 
@@ -39,38 +39,30 @@ object Main extends App {
   }
 
   val activeGWOption = gateways.getValidGateway();
-  
+
   activeGWOption match {
-  case Some(gw) =>println("Using gateway: " + gw.friendlyName);
-  case None =>  println("No active gateway device found");
-	println("exiting");
-	sys.exit();
+    case Some(gw) => println("Using gateway: " + gw.friendlyName);
+    case None =>
+      println("No active gateway device found");
+      println("exiting");
+      sys.exit();
   }
   val activeGW = activeGWOption.get;
 
   val portMapCount = activeGW.getPortMappingNumberOfEntries();
   println("GetPortMappingNumberOfEntries=" + (if (portMapCount != 0) portMapCount.toString else "(unsupported)"));
-  
-    if (LISTALLMAPPINGS) {
-    var pmCount = 0;
-    breakable {
-      while (true) {
-		activeGW.getGenericPortMappingEntry(pmCount) match {
-			case Some(portMapping) => 
-				println("Portmapping #" + pmCount + " successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
-			case None =>
-				println("Portmapping #" + pmCount + " retrieval failed");
-				break;
-        }
-        pmCount += 1;
-      }
-    }
+
+  if (LISTALLMAPPINGS) {
+    activeGW.getAllPortMappingEntries foreach (x => println("Portmapping retrieved (" + x.portMappingDescription + ":" + x.externalPort + ")"));
   } else {
-	activeGW.getGenericPortMappingEntry(0) match {
-		case Some(portMapping) => println("Portmapping #0 successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
-		case None => println("Portmapping #0 retrival failed");
-	}         
+    activeGW.getGenericPortMappingEntry(0) match {
+      case Some(portMapping) => println("Portmapping #0 successfully retrieved (Description: " + portMapping.portMappingDescription.getOrElse(" ") + ", externalPort: " + portMapping.externalPort.getOrElse(" ") + ")");
+      case None => println("Portmapping #0 retrival failed");
+    }
   }
+
+  println("retrieving only port mappings with description: psyonik")
+  activeGW.getAllPortMappingEntriesOf("psyonik") foreach (x => println("Portmapping retrieved (" + x.portMappingDescription + ":" + x.externalPort + ")"));
 
   val localAddress = activeGW.localAddress;
   println("Using local address: " + localAddress.get.getHostAddress());
@@ -80,21 +72,21 @@ object Main extends App {
   println("Querying device to see if a port mapping already exists for port: " + SAMPLE_PORT);
 
   activeGW.getSpecificPortMappingEntry(SAMPLE_PORT, "TCP") match {
-   case Some(portMapping) => 
-     println("Port " + SAMPLE_PORT + " is already mapped. Aborting test.");
-    sys.exit();
-	case None =>
-	println("Mapping free. Sending port mapping request for port " + SAMPLE_PORT);
+    case Some(portMapping) =>
+      println("Port " + SAMPLE_PORT + " is already mapped. Aborting test.");
+      sys.exit();
+    case None =>
+      println("Mapping free. Sending port mapping request for port " + SAMPLE_PORT);
 
-    if (activeGW.addPortMapping(SAMPLE_PORT, SAMPLE_PORT, localAddress.get.getHostAddress(), "TCP", "test")) {
-      println("Mapping Successful. Waiting " + WAIT_TIME + " seconds before removing mapping...");
-      Thread.sleep(1009 * WAIT_TIME);
+      if (activeGW.addPortMapping(SAMPLE_PORT, SAMPLE_PORT, localAddress.get.getHostAddress(), "TCP", "test")) {
+        println("Mapping Successful. Waiting " + WAIT_TIME + " seconds before removing mapping...");
+        Thread.sleep(1009 * WAIT_TIME);
 
-     // if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP"))
-     //   println("Port mapping removed, test SUCCESSFUL");
-     // else
-     //   println("Port mapping removal FAILED");
-    }
+        // if (activeGW.deletePortMapping(SAMPLE_PORT, "TCP"))
+        //   println("Port mapping removed, test SUCCESSFUL");
+        // else
+        //   println("Port mapping removal FAILED");
+      }
   }
   println("Stopping psyonik-upnp");
 }
