@@ -1,5 +1,5 @@
 /** Project */
-name := "upnp"
+name := "psyonik-upnp"
 
 version := "0.0.1-SNAPSHOT"
 

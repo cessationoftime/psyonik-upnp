@@ -23,15 +23,16 @@ import scala.xml.TopScope
 import scala.xml.NodeSeq
 import scala.xml.Node
 
-/** A <tt>GatewayDevice</tt> is a class that abstracts UPnP-compliant gateways
-  * <p/>
-  * It holds all the information that comes back as UPnP responses, and
-  * provides methods to issue UPnP commands to a gateway.
-  *
-  * @author casta (original)
-  * @author ses-jeff (scala)
-  *
-  */
+/**
+ * A <tt>GatewayDevice</tt> is a class that abstracts UPnP-compliant gateways
+ * <p/>
+ * It holds all the information that comes back as UPnP responses, and
+ * provides methods to issue UPnP commands to a gateway.
+ *
+ * @author casta (original)
+ * @author ses-jeff (scala)
+ *
+ */
 class GatewayDevice(var controlURL: Option[String], var serviceType: Option[String]) {
   import GatewayDevice.Commands._
   def this() = this(None, None)
@@ -50,44 +51,52 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   var deviceType: Option[String] = None;
   var deviceTypeCIF: Option[String] = None;
 
-  /** The friendly (human readable) name associated with this device
-    */
+  /**
+   * The friendly (human readable) name associated with this device
+   */
   var friendlyName: Option[String] = None;
 
-  /** The device manufacturer name
-    */
+  /**
+   * The device manufacturer name
+   */
   var manufacturer: Option[String] = None;
 
-  /** The model description as a string
-    */
+  /**
+   * The model description as a string
+   */
   var modelDescription: Option[String] = None;
 
-  /** The URL that can be used to access the IGD interface
-    */
+  /**
+   * The URL that can be used to access the IGD interface
+   */
   var presentationURL: Option[String] = None;
 
-  /** The address used to reach this machine from the GatewayDevice
-    */
+  /**
+   * The address used to reach this machine from the GatewayDevice
+   */
   var localAddress: Option[InetAddress] = None;
 
-  /** The model number (used by the manufacturer to identify the product)
-    */
+  /**
+   * The model number (used by the manufacturer to identify the product)
+   */
   var modelNumber: Option[String] = None;
 
-  /** The model name
-    */
+  /**
+   * The model name
+   */
   var modelName: Option[String] = None;
 
-  /** Retrieves the properties and description of the GatewayDevice.
-    * <p/>
-    * Connects to the device's {@link #location} and parses the response
-    * using a {@link GatewayDeviceHandler} to populate the fields of this
-    * class
-    *
-    * @throws SAXException if an error occurs while parsing the request
-    * @throws IOException  on communication errors
-    * @see org.bitlet.weupnpscala.GatewayDeviceHandler
-    */
+  /**
+   * Retrieves the properties and description of the GatewayDevice.
+   * <p/>
+   * Connects to the device's {@link #location} and parses the response
+   * using a {@link GatewayDeviceHandler} to populate the fields of this
+   * class
+   *
+   * @throws SAXException if an error occurs while parsing the request
+   * @throws IOException  on communication errors
+   * @see org.bitlet.weupnpscala.GatewayDeviceHandler
+   */
 
   @throws(classOf[SAXException])
   @throws(classOf[IOException])
@@ -123,14 +132,15 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     presentationURL = Some(copyOrCatUrl(ipConDescURL, presentationURL.get));
   }
 
-  /** Retrieves the connection status of this device
-    *
-    * @return true if connected, false otherwise
-    * @throws IOException
-    * @throws SAXException
-    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-    * java.lang.String, java.util.Map)
-    */
+  /**
+   * Retrieves the connection status of this device
+   *
+   * @return true if connected, false otherwise
+   * @throws IOException
+   * @throws SAXException
+   * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
+   * java.lang.String, java.util.Map)
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   lazy val isConnected: Boolean = {
@@ -151,17 +161,18 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
 
   }
 
-  /** Retrieves the external IP address associated with this device
-    * <p/>
-    * The external address is the address that can be used to connect to the
-    * GatewayDevice from the external network
-    *
-    * @return the external IP
-    * @throws IOException
-    * @throws SAXException
-    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-    * java.lang.String, java.util.Map)
-    */
+  /**
+   * Retrieves the external IP address associated with this device
+   * <p/>
+   * The external address is the address that can be used to connect to the
+   * GatewayDevice from the external network
+   *
+   * @return the external IP
+   * @throws IOException
+   * @throws SAXException
+   * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
+   * java.lang.String, java.util.Map)
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   lazy val externalIPAddress: Option[String] = {
@@ -178,21 +189,22 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     }
   }
 
-  /** Adds a new port mapping to the GatewayDevices using the supplied
-    * parameters.
-    *
-    * @param externalPort   the external associated with the new mapping
-    * @param internalPort   the internal port associated with the new mapping
-    * @param internalClient the internal client associated with the new mapping
-    * @param protocol       the protocol associated with the new mapping
-    * @param description    the mapping description
-    * @return true if the mapping was succesfully added, false otherwise
-    * @throws IOException
-    * @throws SAXException
-    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-    * java.lang.String, java.util.Map)
-    * @see PortMappingEntry
-    */
+  /**
+   * Adds a new port mapping to the GatewayDevices using the supplied
+   * parameters.
+   *
+   * @param externalPort   the external associated with the new mapping
+   * @param internalPort   the internal port associated with the new mapping
+   * @param internalClient the internal client associated with the new mapping
+   * @param protocol       the protocol associated with the new mapping
+   * @param description    the mapping description
+   * @return true if the mapping was succesfully added, false otherwise
+   * @throws IOException
+   * @throws SAXException
+   * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
+   * java.lang.String, java.util.Map)
+   * @see PortMappingEntry
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def addPortMapping(externalPort: Int, internalPort: Int,
@@ -211,47 +223,68 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
 
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, AddPortMapping, args);
-		  
+
         nameValue.get("errorCode").isEmpty
       case _ => false;
     }
   }
 
-  private def portQueryToPortMappingEntry(nameValue: Map[String, String]) : Option[PortMappingEntry] = {
-   if (nameValue.isEmpty || nameValue.contains("errorCode"))
-		return None;
-  	Some(PortMappingEntry(
-	nameValue.get("NewInternalPort") map (_.toInt),
-	nameValue.get("NewExternalPort") map (_.toInt),
-	nameValue.get("NewRemoteHost"),
-	nameValue.get("NewInternalClient"),
-    nameValue.get("NewProtocol"),
-    nameValue.get("NewEnabled"),
-    nameValue.get("NewPortMappingDescription")));
+  def getAllPortMappingEntriesOf(description: String) = {
+    getAllPortMappingEntries filter (_.portMappingDescription == Some(description))
   }
-  
-  /** Queries the GatewayDevice to retrieve a specific port mapping entry,
-    * corresponding to specified criteria, if present.
-    * <p/>
-    * Retrieves the <tt>PortMappingEntry</tt> associated with
-    * <tt>externalPort</tt> and <tt>protocol</tt>, if present.
-    *
-    * @param externalPort     the external port
-    * @param protocol         the protocol (TCP or UDP)
-    * @return Some(PortMappingEntry) if a valid mapping is found, else None
-    * @throws IOException
-    * @throws SAXException
-    * @todo consider refactoring this method to make it consistent with
-    * Java practices (return the port mapping)
-    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-    * java.lang.String, java.util.Map)
-    * @see PortMappingEntry
-    */
+  def getAllPortMappingEntriesOf(internalClientAddress: InetAddress) = {
+    getAllPortMappingEntries filter (_.internalClient == Some(internalClientAddress.getHostAddress))
+  }
+  def getAllPortMappingEntriesOf(internalClientAddress: InetAddress, description: String) = {
+    getAllPortMappingEntries filter (e => e.internalClient == Some(internalClientAddress.getHostAddress) && e.portMappingDescription == Some(description))
+  }
+
+  def getAllPortMappingEntries = {
+    def looped(entries: List[PortMappingEntry] = Nil): List[PortMappingEntry] = {
+      this.getGenericPortMappingEntry(entries.size) match {
+        case Some(portMapping) => looped(portMapping :: entries)
+        case None => return entries;
+      }
+    }
+    looped()
+  }
+
+  private def portQueryToPortMappingEntry(nameValue: Map[String, String]): Option[PortMappingEntry] = {
+    if (nameValue.isEmpty || nameValue.contains("errorCode"))
+      return None;
+    Some(PortMappingEntry(
+      nameValue.get("NewInternalPort") map (_.toInt),
+      nameValue.get("NewExternalPort") map (_.toInt),
+      nameValue.get("NewRemoteHost"),
+      nameValue.get("NewInternalClient"),
+      nameValue.get("NewProtocol"),
+      nameValue.get("NewEnabled"),
+      nameValue.get("NewPortMappingDescription")));
+  }
+
+  /**
+   * Queries the GatewayDevice to retrieve a specific port mapping entry,
+   * corresponding to specified criteria, if present.
+   * <p/>
+   * Retrieves the <tt>PortMappingEntry</tt> associated with
+   * <tt>externalPort</tt> and <tt>protocol</tt>, if present.
+   *
+   * @param externalPort     the external port
+   * @param protocol         the protocol (TCP or UDP)
+   * @return Some(PortMappingEntry) if a valid mapping is found, else None
+   * @throws IOException
+   * @throws SAXException
+   * @todo consider refactoring this method to make it consistent with
+   * Java practices (return the port mapping)
+   * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
+   * java.lang.String, java.util.Map)
+   * @see PortMappingEntry
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def getSpecificPortMappingEntry(externalPort: Int,
     protocol: String): Option[PortMappingEntry] = {
-	
+
     (controlURL, serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map(
@@ -263,27 +296,28 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
           serviceTypeValue, GetSpecificPortMappingEntry, args);
 
         if (!nameValue.contains("NewInternalClient") || !nameValue.contains("NewInternalPort")) {
-           None;
-		  } else {
-		  portQueryToPortMappingEntry(args ++ nameValue)
-		}
+          None;
+        } else {
+          portQueryToPortMappingEntry(args ++ nameValue)
+        }
       case _ => None;
-      
+
     }
   }
 
-  /** Returns a specific port mapping entry, depending on a the supplied index.
-    *
-    * @param index            the index of the desired port mapping
-    * @return Some(PortMappingEntry) if a valid mapping is found, else None
-    * @throws IOException
-    * @throws SAXException
-    * @todo consider refactoring this method to make it consistent with
-    * Java practices (return the port mapping)
-    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
-    * java.lang.String, java.util.Map)
-    * @see PortMappingEntry
-    */
+  /**
+   * Returns a specific port mapping entry, depending on a the supplied index.
+   *
+   * @param index            the index of the desired port mapping
+   * @return Some(PortMappingEntry) if a valid mapping is found, else None
+   * @throws IOException
+   * @throws SAXException
+   * @todo consider refactoring this method to make it consistent with
+   * Java practices (return the port mapping)
+   * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
+   * java.lang.String, java.util.Map)
+   * @see PortMappingEntry
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def getGenericPortMappingEntry(index: Int): Option[PortMappingEntry] = {
@@ -298,43 +332,45 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetGenericPortMappingEntry, args);
 
-		portQueryToPortMappingEntry(nameValue)
+        portQueryToPortMappingEntry(nameValue)
 
       case _ => None;
-      
+
     }
   }
 
-  /** Retrieves the number of port mappings that are registered on the
-    * GatewayDevice.
-    *
-    * @return the number of port mappings
-    * @throws IOException
-    * @throws SAXException
-    */
+  /**
+   * Retrieves the number of port mappings that are registered on the
+   * GatewayDevice.
+   *
+   * @return the number of port mappings
+   * @throws IOException
+   * @throws SAXException
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def getPortMappingNumberOfEntries(): Int = {
     (controlURL, serviceType) match {
-      case (Some(controlURLValue), Some(serviceTypeValue)) => 
+      case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetPortMappingNumberOfEntries);
 
-          //This originally used Integer.valueOf. Not sure if .toInt will mess it up.
-            nameValue.get("NewPortMappingNumberOfEntries").getOrElse("0").toInt;
-      case _ =>  0      
+        //This originally used Integer.valueOf. Not sure if .toInt will mess it up.
+        nameValue.get("NewPortMappingNumberOfEntries").getOrElse("0").toInt;
+      case _ => 0
     }
   }
 
-  /** Deletes the port mapping associated to <tt>externalPort</tt> and
-    * <tt>protocol</tt>
-    *
-    * @param externalPort the external port
-    * @param protocol     the protocol
-    * @return true if removal was successful
-    * @throws IOException
-    * @throws SAXException
-    */
+  /**
+   * Deletes the port mapping associated to <tt>externalPort</tt> and
+   * <tt>protocol</tt>
+   *
+   * @param externalPort the external port
+   * @param protocol     the protocol
+   * @return true if removal was successful
+   * @throws IOException
+   * @throws SAXException
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def deletePortMapping(externalPort: Int, protocol: String): Boolean = {
@@ -342,13 +378,13 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     //It just kind of returns true if it tried to do it.
     (controlURL, serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
-          val args: Map[String, String] = Map(
-            "NewRemoteHost" -> "",
-            "NewExternalPort" -> Integer.toString(externalPort),
-            "NewProtocol" -> protocol);
-          val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
-            serviceTypeValue, DeletePortMapping, args);
-          true;
+        val args: Map[String, String] = Map(
+          "NewRemoteHost" -> "",
+          "NewExternalPort" -> Integer.toString(externalPort),
+          "NewProtocol" -> protocol);
+        val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
+          serviceTypeValue, DeletePortMapping, args);
+        true;
       case _ => false;
     }
   }
@@ -429,21 +465,22 @@ object GatewayDevice {
     conn.disconnect();
   }
 
-  /** Issues UPnP commands to a GatewayDevice that can be reached at the
-    * specified <tt>url</tt>
-    * <p/>
-    * The command is identified by a <tt>service</tt> and an <tt>action</tt>
-    * and can receive arguments
-    *
-    * @param url     the url to use to contact the device
-    * @param service the service to invoke
-    * @param action  the specific action to perform
-    * @param args    the command arguments
-    * @return the response to the performed command, as a name-value map.
-    * In case errors occur, the returned map will be <i>empty.</i>
-    * @throws IOException  on communication errors
-    * @throws SAXException if errors occur while parsing the response
-    */
+  /**
+   * Issues UPnP commands to a GatewayDevice that can be reached at the
+   * specified <tt>url</tt>
+   * <p/>
+   * The command is identified by a <tt>service</tt> and an <tt>action</tt>
+   * and can receive arguments
+   *
+   * @param url     the url to use to contact the device
+   * @param service the service to invoke
+   * @param action  the specific action to perform
+   * @param args    the command arguments
+   * @return the response to the performed command, as a name-value map.
+   * In case errors occur, the returned map will be <i>empty.</i>
+   * @throws IOException  on communication errors
+   * @throws SAXException if errors occur while parsing the response
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def simpleUPnPcommand(url: String, service: String, action: Commands.Value, args: Map[String, String]): Map[String, String] = {
@@ -466,28 +503,30 @@ object GatewayDevice {
     return nameValue.toMap;
   }
 
-  /** Issues UPnP commands to a GatewayDevice that can be reached at the
-    * specified <tt>url</tt>
-    * <p/>
-    * The command is identified by a <tt>service</tt> and an <tt>action</tt>
-    * and can receive arguments
-    *
-    * @param url     the url to use to contact the device
-    * @param service the service to invoke
-    * @param action  the specific action to perform
-    * @return the response to the performed command, as a name-value map.
-    * In case errors occur, the returned map will be <i>empty.</i>
-    * @throws IOException  on communication errors
-    * @throws SAXException if errors occur while parsing the response
-    */
+  /**
+   * Issues UPnP commands to a GatewayDevice that can be reached at the
+   * specified <tt>url</tt>
+   * <p/>
+   * The command is identified by a <tt>service</tt> and an <tt>action</tt>
+   * and can receive arguments
+   *
+   * @param url     the url to use to contact the device
+   * @param service the service to invoke
+   * @param action  the specific action to perform
+   * @return the response to the performed command, as a name-value map.
+   * In case errors occur, the returned map will be <i>empty.</i>
+   * @throws IOException  on communication errors
+   * @throws SAXException if errors occur while parsing the response
+   */
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def simpleUPnPcommand(url: String, service: String, action: Commands.Value): Map[String, String] = {
     simpleUPnPcommand(url, service, action, Map.empty)
   }
 
-  /** Issues a simpleUPnPcommand, but instead of parsing the result into a HashMap it places the result in an XML file.  The XML can then be used for testing, etc.
-    */
+  /**
+   * Issues a simpleUPnPcommand, but instead of parsing the result into a HashMap it places the result in an XML file.  The XML can then be used for testing, etc.
+   */
   def simpleUPnPcommand_createFile(url: String, service: String, action: Commands.Value, args: Map[String, String], filename: String): Unit = {
 
     //handles parsing the result of the UPnP command into a file

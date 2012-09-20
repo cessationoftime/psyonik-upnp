@@ -23,27 +23,32 @@ import java.util.StringTokenizer
 import util.control.Breaks._
 import scala.collection.parallel.immutable.ParMap
 import com.psyonik.upnp.GatewayDiscover.GatewayDeviceMap
-/** Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnpscala.GatewayDiscover#discover()} method.
-  */
+/**
+ * Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnpscala.GatewayDiscover#discover()} method.
+ */
 object GatewayDiscover {
-  /** The SSDP port
-    */
+  /**
+   * The SSDP port
+   */
   val PORT = 1900;
 
-  /** The broadcast address to use when trying to contact UPnP devices
-    */
+  /**
+   * The broadcast address to use when trying to contact UPnP devices
+   */
   val IP = "239.255.255.250";
 
-  /** A map of the GatewayDevices discovered so far.
-    * The assumption is that a machine is connected to up to a Gateway Device
-    * per InetAddress
-    */
+  /**
+   * A map of the GatewayDevices discovered so far.
+   * The assumption is that a machine is connected to up to a Gateway Device
+   * per InetAddress
+   */
 
   //case class DiscoveredGatewayDevice(inet: InetAddress, gwd: GatewayDevice)
   def SendDiscoveryThread(ip: InetAddress, searchMessage: String) = {
 
-    /** The timeout to set for the initial broadcast request
-      */
+    /**
+     * The timeout to set for the initial broadcast request
+     */
     val TIMEOUT = 3000;
 
     val ssdp = try {
@@ -101,22 +106,23 @@ object GatewayDiscover {
     ssdp.flatMap(_._2) //return discoveredGatewayDeviceOption
   }
 
-  /** Discovers Gateway Devices on the network(s) the executing machine is
-    * connected to.
-    * <p/>
-    * The host may be connected to different networks via different network
-    * interfaces.
-    * Assumes that each network interface has a different InetAddress and
-    * returns a map associating every GatewayDevice (responding to a broadcast
-    * discovery message) with the InetAddress it is connected to.
-    *
-    * @return a map containing a GatewayDevice per InetAddress
-    * @throws SocketException
-    * @throws UnknownHostException
-    * @throws IOException
-    * @throws SAXException
-    * @throws ParserConfigurationException
-    */
+  /**
+   * Discovers Gateway Devices on the network(s) the executing machine is
+   * connected to.
+   * <p/>
+   * The host may be connected to different networks via different network
+   * interfaces.
+   * Assumes that each network interface has a different InetAddress and
+   * returns a map associating every GatewayDevice (responding to a broadcast
+   * discovery message) with the InetAddress it is connected to.
+   *
+   * @return a map containing a GatewayDevice per InetAddress
+   * @throws SocketException
+   * @throws UnknownHostException
+   * @throws IOException
+   * @throws SAXException
+   * @throws ParserConfigurationException
+   */
   @throws(classOf[SocketException])
   @throws(classOf[UnknownHostException])
   @throws(classOf[IOException])
@@ -146,8 +152,9 @@ object GatewayDiscover {
           SendDiscoveryThread(x, searchMessage)
         }
       }
+      val next = i - 1
       //if we have a a device defined or we have tried all search types then return
-      if (deviceList.isDefinedAt(0) || i < 0) return m ++ deviceList else return searchLoop(i - 1, m ++ deviceList)
+      if (deviceList.isDefinedAt(0) || next < 0) return m ++ deviceList else return searchLoop(next, m ++ deviceList)
     } // loop SEARCHTYPES
     // (0 until SEARCHTYPES.length)
     val devs = searchLoop(SEARCHTYPES.length - 1, new HashMap[InetAddress, GatewayDevice]())
@@ -184,13 +191,14 @@ object GatewayDiscover {
 
   }
 
-  /** Retrieves all local IP addresses from all present network devices on the local PC
-    *
-    * @param getIPv4            boolean flag if IPv4 addresses shall be retrieved
-    * @param getIPv6            boolean flag if IPv6 addresses shall be retrieved
-    * @param sortIPv4BeforeIPv6 if true, IPv4 addresses will be sorted before IPv6 addresses
-    * @return Collection if {@link InetAddress}es
-    */
+  /**
+   * Retrieves all local IP addresses from all present network devices on the local PC
+   *
+   * @param getIPv4            boolean flag if IPv4 addresses shall be retrieved
+   * @param getIPv6            boolean flag if IPv6 addresses shall be retrieved
+   * @param sortIPv4BeforeIPv6 if true, IPv4 addresses will be sorted before IPv6 addresses
+   * @return Collection if {@link InetAddress}es
+   */
   //Private removed for testing
   def getLocalInetAddresses(getIPv4: Boolean, getIPv6: Boolean, sortIPv4BeforeIPv6: Boolean): Seq[InetAddress] = {
     def getAllNetworkInterfaces: Seq[NetworkInterface] = {
@@ -250,18 +258,17 @@ object GatewayDiscover {
     if (sortIPv4BeforeIPv6) filteredAddresses sortWith IPv4BeforeIPv6 else filteredAddresses
   }
 
-  
+  //wrap Map[InetAddress, GatewayDevice] with the getValidGateway function
+  class GatewayDeviceMap private[upnp] (val devices: Map[InetAddress, GatewayDevice]) {
+    /**
+     * Gets the first connected gateway
+     *
+     * @return the first GatewayDevice which is connected to the network, or None
+     */
+    def getValidGateway(): Option[GatewayDevice] = {
+      val d = devices.map(_._2) filter (_.isConnected)
+      if (!d.isEmpty) Some(d.head) else None
 
-    //wrap Map[InetAddress, GatewayDevice] with the getValidGateway function
-    class GatewayDeviceMap private[upnp] (val devices: Map[InetAddress, GatewayDevice]) {
-      /** Gets the first connected gateway
-        *
-        * @return the first GatewayDevice which is connected to the network, or None
-        */
-      def getValidGateway(): Option[GatewayDevice] = {
-        val d = devices.map(_._2) filter (_.isConnected)
-        if (!d.isEmpty) Some(d.head) else None
-
-      }
     }
+  }
 }
