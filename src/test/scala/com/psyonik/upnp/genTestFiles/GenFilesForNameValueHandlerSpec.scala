@@ -1,13 +1,10 @@
 package com.psyonik.upnp.genTestFiles
-import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
-import org.specs2.runner.JUnitRunner
 import com.psyonik.upnp.GatewayDevice
 import org.specs2.specification.Scope
 
 /** This Specification is not a real set of tests, but rather it is a utility to generate XML resources to use while running the NameValueHandlerSpec
   */
-@RunWith(classOf[JUnitRunner])
 class GenFilesForNameValueHandlerSpec extends Specification {
   skipAll // causes this Specification to be ignored
   import GatewayDevice.Commands._

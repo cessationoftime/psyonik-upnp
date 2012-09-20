@@ -2,14 +2,11 @@ package com.psyonik.upnp
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import org.specs2.mock.Mockito
-import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
 import java.net.InetAddress
 import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
 import scala.collection.parallel.immutable.ParMap
 
-@RunWith(classOf[JUnitRunner])
 class GatewayDiscoverSpec extends Specification with Mockito {
   args(sequential = true)
   trait system extends Scope {
