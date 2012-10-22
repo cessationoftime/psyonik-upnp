@@ -5,12 +5,12 @@ version := "0.0.1-SNAPSHOT"
 
 organization := "com.psyonik"
 
-scalaVersion := "2.10.0-M7"
+scalaVersion := "2.10.0-RC1"
 
 // Dependencies 
 libraryDependencies ++= Seq(
-	"org.specs2" % "specs2_2.10.0-M7" % "1.12.1.1" % "test",
-    "org.scalacheck" % "scalacheck_2.10.0-M7" % "1.10.0"  % "test",
+	"org.specs2" % "specs2_2.10.0-RC1" % "1.12.2" % "test",
+    "org.scalacheck" % "scalacheck_2.10.0-RC1" % "1.10.0"  % "test",
     "org.pegdown" % "pegdown" % "1.0.2" % "test",
 	"org.mockito" % "mockito-all" % "1.9.0" % "test")
 	
