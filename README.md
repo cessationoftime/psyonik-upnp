@@ -6,14 +6,13 @@ This library was derived from the Java library [weupnp](http://code.google.com/p
 Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 
 ##Tools and resources for working with UPNP
-http://opentools.homeip.net/dev-tools-for-upnp (DeviceSpy can tell you what the services/methods the device supports)
-
-http://upnp.org/resources/upnpresources.zip
+* http://opentools.homeip.net/dev-tools-for-upnp (DeviceSpy can tell you what the services/methods the device supports)
+* http://coherence.beebits.net/wiki/UPnP-Inspector
+* http://upnp.org/resources/upnpresources.zip
 
 Other Implementations:
-https://github.com/tomp2p/TomP2P/blob/master/src/main/java/net/tomp2p/upnp/Discovery.java
-
-https://bitbucket.org/debillin/upnplib
+* https://github.com/tomp2p/TomP2P/blob/master/src/main/java/net/tomp2p/upnp/Discovery.java
+* https://bitbucket.org/debillin/upnplib
 
 ##psyonik-upnp Example:
 
