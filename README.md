@@ -6,7 +6,7 @@ This library was derived from the Java library [weupnp](http://code.google.com/p
 Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 
 ##Tools and resources for working with UPNP
-http://opentools.homeip.net/dev-tools-for-upnp
+http://opentools.homeip.net/dev-tools-for-upnp (DeviceSpy can tell you what the services/methods the device supports)
 
 http://upnp.org/resources/upnpresources.zip
 
