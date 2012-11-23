@@ -5,7 +5,11 @@ Scala implementation of uPnP library.
 This library was derived from the Java library [weupnp](http://code.google.com/p/weupnp/).
 Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 
-Example:
+##Tools and resources for working with UPNP
+http://opentools.homeip.net/dev-tools-for-upnp
+http://upnp.org/resources/upnpresources.zip
+
+##psyonik-upnp Example:
 
 ```scala
 import com.psyonik.upnp._
