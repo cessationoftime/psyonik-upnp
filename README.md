@@ -7,7 +7,13 @@ Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 
 ##Tools and resources for working with UPNP
 http://opentools.homeip.net/dev-tools-for-upnp
+
 http://upnp.org/resources/upnpresources.zip
+
+Other Implementations:
+https://github.com/tomp2p/TomP2P/blob/master/src/main/java/net/tomp2p/upnp/Discovery.java
+
+https://bitbucket.org/debillin/upnplib
 
 ##psyonik-upnp Example:
 
