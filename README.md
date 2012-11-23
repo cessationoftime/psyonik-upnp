@@ -9,6 +9,8 @@ Also take a look at: [upnp=portmapper](http://upnp-portmapper.sourceforge.net/)
 * http://opentools.homeip.net/dev-tools-for-upnp (DeviceSpy can tell you what the services/methods the device supports)
 * http://coherence.beebits.net/wiki/UPnP-Inspector
 * http://upnp.org/resources/upnpresources.zip
+* http://upnp.org/specs/gw/UPnP-gw-WANIPConnection-v2-Service.pdf
+* http://www.upnp.org/specs/gw/UPnP-gw-WANIPConnection-v1-Service.pdf
 
 Other Implementations:
 * https://github.com/tomp2p/TomP2P/blob/master/src/main/java/net/tomp2p/upnp/Discovery.java
