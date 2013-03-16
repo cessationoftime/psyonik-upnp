@@ -22,6 +22,7 @@ import scala.xml.Elem
 import scala.xml.TopScope
 import scala.xml.NodeSeq
 import scala.xml.Node
+import java.io.InputStream
 
 /**
  * A <tt>GatewayDevice</tt> is a class that abstracts UPnP-compliant gateways
@@ -98,6 +99,11 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
    * @see org.bitlet.weupnpscala.GatewayDeviceHandler
    */
 
+  def parseXml(inputStream: InputStream) = {
+   val bufferedSource =  scala.io.Source.fromInputStream(inputStream)
+   bufferedSource.getLines foreach println
+  }
+  
   @throws(classOf[SAXException])
   @throws(classOf[IOException])
   def loadDescription() = {
@@ -109,22 +115,36 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     val parser: XMLReader = XMLReaderFactory.createXMLReader();
     parser.setContentHandler(new GatewayDeviceHandler(this));
     val inputStream = urlConn.getInputStream();
+  //  parseXml(inputStream);
     //parser.parse(new InputSource(urlConn.getInputStream()));
     parser.parse(new InputSource(inputStream));
 
     //This is why using all of them in a match statement won't work.
     /* fix urls */
-    var ipConDescURL: String = new String();
-    if (urlBase.isDefined && urlBase.get.trim().length() > 0) {
-      ipConDescURL = urlBase.get;
-    } else {
-      ipConDescURL = location.get;
-    }
+    
+   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(location)
+     
+//     if (urlBase.isDefined && urlBase.get.trim().length() > 0) {
+//       urlBase.get;
+//    } else {
+//       location.get;
+//    }
 
-    val lastSlashIndex: Int = ipConDescURL.indexOf('/', 7);
+   .map{descUrl =>
+   val lastSlashIndex: Int = descUrl.indexOf('/',7)
+     
     if (lastSlashIndex > 0) {
-      ipConDescURL = ipConDescURL.substring(0, lastSlashIndex);
-    }
+      descUrl.substring(0, lastSlashIndex);
+    } else descUrl
+   
+   }
+   
+   
+   
+   // val lastSlashIndex: Int = ipConDescURL.get.indexOf('/', 7);
+//    if (lastSlashIndex > 0) {
+//      ipConDescURL = ipConDescURL.substring(0, lastSlashIndex);
+//    }
 
     SCPDURL = copyOrCatUrl(ipConDescURL, SCPDURL);
     controlURL = copyOrCatUrl(ipConDescURL, controlURL);
@@ -391,12 +411,12 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
 
   // private methods
 
-  private def copyOrCatUrl(dst: String, srcOption: Option[String]): Option[String] = {
-    srcOption.map {src => 
+  private def copyOrCatUrl(dstOption: Option[String], srcOption: Option[String]): Option[String] = {
+    srcOption.flatMap {src => 
       if (src.startsWith("http://")) 
-         src
+         Some(src)
        else 
-        dst + (if (!src.startsWith("/")) "/" else "") + src;
+        dstOption.map( _ + (if (!src.startsWith("/")) "/" else "") + src );
     }
   }
 }
