@@ -1,10 +1,7 @@
 package com.psyonik.upnp
-import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
-import org.specs2.runner.JUnitRunner
 import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.InputSource
-import scala.tools.nsc.io.File
 import java.net.URI
 import java.io.BufferedReader
 import java.io.FileReader
@@ -14,7 +11,6 @@ import org.specs2.specification.Scope
   * Sample xml response files are used here to test NameValueHandler.
   * The test files can be generated from a router using the code in "GenFilesForNameValueHandlerSpec"
   */
-@RunWith(classOf[JUnitRunner])
 class NameValueHandlerUnitSpec extends Specification {
   val testFilePath = "src/test/resources/com/psyonik/upnp/namevaluehandlerspec/"
 
