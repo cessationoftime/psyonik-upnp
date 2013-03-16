@@ -487,7 +487,7 @@ object GatewayDevice {
         parser.parse(inputSource);
       } catch {
         case e: SAXException => {}
-        case e => throw new RuntimeException(e);
+        case e => throw e;
       }
     }
 

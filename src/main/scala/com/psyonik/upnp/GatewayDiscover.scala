@@ -133,7 +133,10 @@ object GatewayDiscover {
 
     // ST parameter: Search Targets
     val SEARCHTYPES: Array[String] = Array(
-      "urn:schemas-upnp-org:device:InternetGatewayDevice:1", "urn:schemas-upnp-org:service:WANIPConnection:1", "urn:schemas-upnp-org:service:WANPPPConnection:1");
+      "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
+      "urn:schemas-upnp-org:service:WANIPConnection:1"
+      //, "urn:schemas-upnp-org:service:WANPPPConnection:1"
+      );
 
     //val devs = (0 until SEARCHTYPES.length) flatMap { i =>
     def searchLoop(i: Int, m: Map[InetAddress, GatewayDevice]): Map[InetAddress, GatewayDevice] = { //flatMap { i =>
