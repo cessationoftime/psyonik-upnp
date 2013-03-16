@@ -2,7 +2,8 @@ package com.psyonik.upnp
 import org.specs2.mutable.Specification
 
 class GatewayDeviceUnitSpec extends Specification {
-  val controlURLValue = "http://192.168.10.254:4444/wipconn";
+  //val controlURLValue = "http://192.168.1.1:4444/wipconn"; //old Trendnet router
+  val controlURLValue = "http://192.168.1.1:1780/control?WANIPConnection"; //Cisco Linksys E2000
   val serviceTypeValue = "urn:schemas-upnp-org:service:WANIPConnection:1";
   "GatewayDevice" should {
     import GatewayDevice.Commands._

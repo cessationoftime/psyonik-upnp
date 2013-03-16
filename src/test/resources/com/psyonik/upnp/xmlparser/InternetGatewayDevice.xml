@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:pnpx="http://schemas.microsoft.com/windows/pnpx/2005/11" xmlns:df="http://schemas.microsoft.com/windows/2008/09/devicefoundation">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<device>
+		<pnpx:X_hardwareId>VEN_0BD5&amp;DEV_0002&amp;REV_01 VEN_0033&amp;DEV_0008&amp;REV_01</pnpx:X_hardwareId>
+		<pnpx:X_deviceCategory>NetworkInfrastructure.Router NetworkInfrastructure.AccessPoint</pnpx:X_deviceCategory>
+		<df:X_deviceCategory>Network.Router.Wireless</df:X_deviceCategory>
+		<df:X_modelId>73587E11-8436-4307-940F-7798581A12BC</df:X_modelId>
+		<deviceType>urn:schemas-upnp-org:device:InternetGatewayDevice:1</deviceType>
+		<friendlyName>fightclub</friendlyName>
+		<manufacturer>Cisco</manufacturer>
+		<manufacturerURL>http://www.myciscohome.com</manufacturerURL>
+		<modelDescription>Internet Access Server</modelDescription>
+		<modelName>Linksys Series Router E2000</modelName>
+		<modelNumber>E2000</modelNumber>
+		<serialNumber>CVR01KB71444</serialNumber>
+		<modelURL>http://www.linksys.com/support/E2000</modelURL>
+		<UDN>uuid:F9FE681A-8A18-EE0E-24F5-1C259A21C726</UDN>
+		<serviceList>
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:Layer3Forwarding:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:L3Forwarding1</serviceId>
+				<SCPDURL>/x_layer3forwarding.xml</SCPDURL>
+				<controlURL>/control?Layer3Forwarding</controlURL>
+				<eventSubURL>/event?Layer3Forwarding</eventSubURL>
+			</service>
+		</serviceList>
+		<deviceList>
+			<device>
+				<deviceType>urn:schemas-upnp-org:device:WANDevice:1</deviceType>
+				<friendlyName>WANDevice</friendlyName>
+				<manufacturer>Cisco</manufacturer>
+				<manufacturerURL>http://www.linksysbycisco.com</manufacturerURL>
+				<modelDescription>Internet Access Server</modelDescription>
+				<modelName>E2000</modelName>
+				<modelURL>http://www.linksysbycisco.com/international</modelURL>
+				<UDN>uuid:CD8E926E-BF81-FA5B-CBF9-23E3A505DD54</UDN>
+				<serviceList>
+					<service>
+						<serviceType>urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1</serviceType>
+						<serviceId>urn:upnp-org:serviceId:WANCommonIFC1</serviceId>
+						<SCPDURL>/x_wancommoninterfaceconfig.xml</SCPDURL>
+						<controlURL>/control?WANCommonInterfaceConfig</controlURL>
+						<eventSubURL>/event?WANCommonInterfaceConfig</eventSubURL>
+					</service>
+				</serviceList>
+				<deviceList>
+					<device>
+						<deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>
+						<friendlyName>WAN Connection Device</friendlyName>
+						<manufacturer>Cisco</manufacturer>
+						<manufacturerURL>http://www.linksysbycisco.com</manufacturerURL>
+						<modelDescription>Internet Access Server</modelDescription>
+						<modelName>E2000</modelName>
+						<modelURL>http://www.linksysbycisco.com/international</modelURL>
+						<UDN>uuid:7404E2CE-1E5B-D570-B2AA-7FCCA73A8A63</UDN>
+						<serviceList>
+							<service>
+								<serviceType>urn:schemas-upnp-org:service:WANIPConnection:1</serviceType>
+								<serviceId>urn:upnp-org:serviceId:WANIPConn1</serviceId>
+								<SCPDURL>/x_wanipconnection.xml</SCPDURL>
+								<controlURL>/control?WANIPConnection</controlURL>
+								<eventSubURL>/event?WANIPConnection</eventSubURL>
+							</service>
+						</serviceList>
+					</device>
+				</deviceList>
+			</device>
+			<device>
+				<deviceType>urn:schemas-upnp-org:device:LANDevice:1</deviceType>
+				<friendlyName>LANDevice</friendlyName>
+				<manufacturer>Cisco</manufacturer>
+				<manufacturerURL>http://www.linksysbycisco.com</manufacturerURL>
+				<modelDescription>Internet Access Server</modelDescription>
+				<modelName>E2000</modelName>
+				<modelURL>http://www.linksysbycisco.com/international</modelURL>
+				<UDN>uuid:7FFEB88D-E8F9-AAB2-D4FD-D4EAAC1A16D3</UDN>
+				<serviceList>
+					<service>
+						<serviceType>urn:schemas-upnp-org:service:LANHostConfigManagement:1</serviceType>
+						<serviceId>urn:upnp-org:serviceId:LANHostCfg1</serviceId>
+						<SCPDURL>/x_lanhostconfigmanagement.xml</SCPDURL>
+						<controlURL>/control?LANHostConfigManagement</controlURL>
+						<eventSubURL>/event?LANHostConfigManagement</eventSubURL>
+					</service>
+				</serviceList>
+			</device>
+		</deviceList>
+		<presentationURL>http://192.168.1.1</presentationURL>
+	</device>
+</root>
+

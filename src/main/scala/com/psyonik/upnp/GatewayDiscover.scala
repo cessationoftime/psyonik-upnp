@@ -41,15 +41,15 @@ object GatewayDiscover {
    */
 
   //case class DiscoveredGatewayDevice(inet: InetAddress, gwd: GatewayDevice)
-  def SendDiscoveryThread(ip: InetAddress, searchMessage: String) = {
+  def SendDiscoveryThread(localAddress: InetAddress, searchMessage: String) = {
 
     /**
      * The timeout to set for the initial broadcast request
      */
     val TIMEOUT = 3000;
 
-    val ssdp = try {
-      val ssdp_try = new DatagramSocket(new InetSocketAddress(ip, 0))
+    val ssdp : Option[(java.net.DatagramSocket, Option[(java.net.InetAddress,  com.psyonik.upnp.GatewayDevice)])] =  try {
+      val ssdp_try = new DatagramSocket(new InetSocketAddress(localAddress, 0))
       val searchMessageBytes = searchMessage.getBytes;
       val ssdpDiscoverPacket = new DatagramPacket(searchMessageBytes, searchMessageBytes.length);
       ssdpDiscoverPacket.setAddress(InetAddress.getByName(IP));
@@ -59,7 +59,7 @@ object GatewayDiscover {
       ssdp_try.setSoTimeout(TIMEOUT);
 
       //  def receive(iter: Int): Option[Tuple2[InetAddress, GatewayDevice]] = {
-      val discoveredGatewayDeviceOption = {
+      val discoveredGatewayDeviceOption : Option[(InetAddress,GatewayDevice)] = {
         val receivePacket = new DatagramPacket(new Array[Byte](1536), 1536);
 
         try {
@@ -71,17 +71,18 @@ object GatewayDiscover {
           // println("Array.copy")
           Array.copy(receivePacket.getData(), 0, receivedData, 0, receivePacket.getLength);
           // println("Copied. Parsing.")
-          val gateDev: GatewayDevice = parseMSearchReply(receivedData);
-          // println("Parsed.")
-          gateDev.localAddress = Some(ip);
+          
+          val (locationOption,deviceSearchTargetOption) = parseMSearchReply(receivedData);
+          val gateDev: Option[GatewayDevice] = locationOption.map(location => new GatewayDevice(location,localAddress));
+
           // println("Loading description.")
-          gateDev.loadDescription();
+         // gateDev.loadDescription();
           // println("Now going into the lock.")
           //TODO: Not sure if this is synchronizing properly.
           //Need to look up scala synchronization.
 
           //println("In the lock.")
-          Some(Tuple2(ip, gateDev));
+         gateDev.map(gd =>(localAddress, gd));
         } catch {
           case (ste: SocketTimeoutException) ⇒
             // if (iter < 2) receive(iter + 1) else {
@@ -133,7 +134,10 @@ object GatewayDiscover {
 
     // ST parameter: Search Targets
     val SEARCHTYPES: Array[String] = Array(
-      "urn:schemas-upnp-org:device:InternetGatewayDevice:1", "urn:schemas-upnp-org:service:WANIPConnection:1", "urn:schemas-upnp-org:service:WANPPPConnection:1");
+      "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
+      "urn:schemas-upnp-org:service:WANIPConnection:1"
+      //, "urn:schemas-upnp-org:service:WANPPPConnection:1"
+      );
 
     //val devs = (0 until SEARCHTYPES.length) flatMap { i =>
     def searchLoop(i: Int, m: Map[InetAddress, GatewayDevice]): Map[InetAddress, GatewayDevice] = { //flatMap { i =>
@@ -161,12 +165,13 @@ object GatewayDiscover {
     return devs.toMap
   }
 
-  def parseMSearchReply(reply: Array[Byte]): GatewayDevice = {
-    val device: GatewayDevice = new GatewayDevice();
-
+  def parseMSearchReply(reply: Array[Byte]): (Option[String],Option[String] ) = {
     val replyString: String = new String(reply);
     val st: StringTokenizer = new StringTokenizer(replyString, "\n");
 
+    var deviceLocation : Option[String] = None
+    var deviceSearchTarget : Option[String] = None
+    
     while (st.hasMoreTokens()) {
       val line: String = st.nextToken().trim();
 
@@ -178,15 +183,15 @@ object GatewayDiscover {
         val trimmedValue = value map (_.trim)
 
         if (key.compareToIgnoreCase("location") == 0) {
-          device.location = trimmedValue;
+          deviceLocation = trimmedValue;
 
         } else if (key.compareToIgnoreCase("st") == 0) { // Search Target
-          device.st = trimmedValue;
+          deviceSearchTarget = trimmedValue;
         }
       }
     }
 
-    return device;
+    return (deviceLocation,deviceSearchTarget);
 
   }
 
@@ -205,8 +210,8 @@ object GatewayDiscover {
         val n = NetworkInterface.getNetworkInterfaces
         if (n == null) Nil else n.toSeq;
       } catch {
-        case (e: SocketException) ⇒ Nil
-        case e ⇒ throw new RuntimeException(e)
+       // case (e: SocketException) ⇒ Nil
+        case e : Exception => e.printStackTrace(); Nil
       }
     }
 
@@ -223,8 +228,8 @@ object GatewayDiscover {
             a.toList
         }
       } catch {
-        case (e: SocketException) ⇒ return Nil;
-        case e ⇒ throw new RuntimeException(e)
+        //case (e: SocketException) ⇒ return Nil;
+          case e : Exception => e.printStackTrace(); Nil
       }
 
     }
