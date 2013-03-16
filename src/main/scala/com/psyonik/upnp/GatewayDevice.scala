@@ -35,12 +35,12 @@ import scala.xml.XML
  * @author ses-jeff (scala)
  *
  */
-  /** @param localAddress
-   * The address used to reach this machine from the GatewayDevice
-   */
+/**
+ * @param localAddress
+ * The address used to reach this machine from the GatewayDevice
+ */
 
-
-class GatewayDevice(val location:String,val st:Option[String], val localAddress : InetAddress) {
+class GatewayDevice(val location: String, val localAddress: InetAddress) {
   import GatewayDevice.Commands._
 
   /**
@@ -55,125 +55,115 @@ class GatewayDevice(val location:String,val st:Option[String], val localAddress 
    * @see org.bitlet.weupnpscala.GatewayDeviceHandler
    */
 
-//  def parseXml(inputStream: InputStream) = {
-//   val bufferedSource =  scala.io.Source.fromInputStream(inputStream)
-//   bufferedSource.getLines foreach println
-//  }
-  
-//  @throws(classOf[SAXException])
-//  @throws(classOf[IOException])
-//  def loadDescription() = {
-    //TODO: Fix the use of options here.
-    //Using all of them in a match statement won't work.
-    private val urlConn: URLConnection = new URL(location).openConnection();
-    urlConn.setReadTimeout(GatewayDevice.HTTP_RECEIVE_TIMEOUT);
+  //  def parseXml(inputStream: InputStream) = {
+  //   val bufferedSource =  scala.io.Source.fromInputStream(inputStream)
+  //   bufferedSource.getLines foreach println
+  //  }
 
-   // val parser: XMLReader = XMLReaderFactory.createXMLReader();
-   // parser.setContentHandler(new GatewayDeviceHandler(this));
-    private val inputStream = urlConn.getInputStream();
+  //  @throws(classOf[SAXException])
+  //  @throws(classOf[IOException])
+  //  def loadDescription() = {
+  //TODO: Fix the use of options here.
+  //Using all of them in a match statement won't work.
+  private val urlConn: URLConnection = new URL(location).openConnection();
+  urlConn.setReadTimeout(GatewayDevice.HTTP_RECEIVE_TIMEOUT);
+
+  // val parser: XMLReader = XMLReaderFactory.createXMLReader();
+  // parser.setContentHandler(new GatewayDeviceHandler(this));
+  private val inputStream = urlConn.getInputStream();
   //  parseXml(inputStream);
-    //parser.parse(new InputSource(urlConn.getInputStream()));
+  //parser.parse(new InputSource(urlConn.getInputStream()));
   //  parser.parse(new InputSource(inputStream));
-    
+
   private val xmlFromInputStream = scala.xml.XML.load(inputStream)
   val urlBase: Option[String] = (xmlFromInputStream \ "URLBase").textOption
 
-      
-   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(Some(location)).map{descUrl =>
-   		val lastSlashIndex: Int = descUrl.indexOf('/',7)
-     
-	    if (lastSlashIndex > 0) {
-	      descUrl.substring(0, lastSlashIndex);
-	    } else descUrl
-   
-   }
-  
+  val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(Some(location)).map { descUrl =>
+    val lastSlashIndex: Int = descUrl.indexOf('/', 7)
+
+    if (lastSlashIndex > 0) {
+      descUrl.substring(0, lastSlashIndex);
+    } else descUrl
+
+  }
+
   object RootDevice {
-   private val rootDeviceNodeSeq = (xmlFromInputStream \ "device")
-  
+    private val rootDeviceNodeSeq = (xmlFromInputStream \ "device")
+
     /**
-   * The friendly (human readable) name associated with this device
-   */
-  val friendlyName: Option[String] = (rootDeviceNodeSeq \ "friendlyName").textOption
+     * The friendly (human readable) name associated with this device
+     */
+    val friendlyName: Option[String] = (rootDeviceNodeSeq \ "friendlyName").textOption
 
-  /**
-   * The device manufacturer name
-   */
-  val manufacturer: Option[String] = (rootDeviceNodeSeq \ "manufacturer").textOption
-
-  /**
-   * The model description as a string
-   */
-  val modelDescription: Option[String] = (rootDeviceNodeSeq \ "modelDescription").textOption;
-
-  /**
-   * The URL that can be used to access the IGD interface
-   */
-  val presentationURL: Option[String] = copyOrCatUrl(ipConDescURL, (rootDeviceNodeSeq \ "presentationURL").textOption)
-    
     /**
-   * The model number (used by the manufacturer to identify the product)
-   */
-  val modelNumber: Option[String] = (rootDeviceNodeSeq \ "modelNumber").textOption;
+     * The device manufacturer name
+     */
+    val manufacturer: Option[String] = (rootDeviceNodeSeq \ "manufacturer").textOption
 
-  /**
-   * The model name
-   */
-  val modelName: Option[String] = (rootDeviceNodeSeq \ "modelName").textOption;
-  
-  private val allDevices = rootDeviceNodeSeq \\ "device"
-  
-  private val allServices = rootDeviceNodeSeq \\ "service"
-  
-  def deviceXml(deviceType: String) = allDevices.filter(d => (d \ "deviceType").text.contains(deviceType)).headOption
-  
-  def serviceXml(serviceType: String) = allServices.filter(d => (d \ "serviceType").text.contains(serviceType)).headOption
-  
-  def innerNode(nodeOption:Option[Node],name:String) = nodeOption.flatMap(x => (x \ name).textOption) 
-  
-  
-  object WANDevice {
-    private val wanDeviceXML = deviceXml("urn:schemas-upnp-org:device:WANDevice")
-    val deviceType: Option[String] = innerNode(wanDeviceXML,"deviceType")
-    object WANCommonInterfaceConfig { //CIF
-      private val wanCommonInterfaceConfigXml = serviceXml("urn:schemas-upnp-org:service:WANCommonInterfaceConfig")
-      val serviceType: Option[String] = innerNode(wanCommonInterfaceConfigXml,"serviceType")
-	  val controlURL: Option[String] =  copyOrCatUrl(ipConDescURL, innerNode(wanCommonInterfaceConfigXml,"controlURL"))
-	  val eventSubURL: Option[String] = innerNode(wanCommonInterfaceConfigXml,"eventSubURL")
-	  val SCPDURL: Option[String] = innerNode(wanCommonInterfaceConfigXml,"SCPDURL")
+    /**
+     * The model description as a string
+     */
+    val modelDescription: Option[String] = (rootDeviceNodeSeq \ "modelDescription").textOption;
+
+    /**
+     * The URL that can be used to access the IGD interface
+     */
+    val presentationURL: Option[String] = copyOrCatUrl(ipConDescURL, (rootDeviceNodeSeq \ "presentationURL").textOption)
+
+    /**
+     * The model number (used by the manufacturer to identify the product)
+     */
+    val modelNumber: Option[String] = (rootDeviceNodeSeq \ "modelNumber").textOption;
+
+    /**
+     * The model name
+     */
+    val modelName: Option[String] = (rootDeviceNodeSeq \ "modelName").textOption;
+
+    private val allDevices = rootDeviceNodeSeq \\ "device"
+
+    private val allServices = rootDeviceNodeSeq \\ "service"
+
+    def deviceXml(deviceType: String) = allDevices.filter(d => (d \ "deviceType").text.contains(deviceType)).headOption
+
+    def serviceXml(serviceType: String) = allServices.filter(d => (d \ "serviceType").text.contains(serviceType)).headOption
+
+    def innerNode(nodeOption: Option[Node], name: String) = nodeOption.flatMap(x => (x \ name).textOption)
+
+    object WANDevice {
+      private val wanDeviceXML = deviceXml("urn:schemas-upnp-org:device:WANDevice")
+      val deviceType: Option[String] = innerNode(wanDeviceXML, "deviceType")
+      object WANCommonInterfaceConfig { //CIF
+        private val wanCommonInterfaceConfigXml = serviceXml("urn:schemas-upnp-org:service:WANCommonInterfaceConfig")
+        val serviceType: Option[String] = innerNode(wanCommonInterfaceConfigXml, "serviceType")
+        val controlURL: Option[String] = copyOrCatUrl(ipConDescURL, innerNode(wanCommonInterfaceConfigXml, "controlURL"))
+        val eventSubURL: Option[String] = innerNode(wanCommonInterfaceConfigXml, "eventSubURL")
+        val SCPDURL: Option[String] = innerNode(wanCommonInterfaceConfigXml, "SCPDURL")
+      }
+
+      object WANConnectionDevice {
+        private val wanConnectionDeviceXml = deviceXml("urn:schemas-upnp-org:device:WANConnectionDevice")
+        val deviceType: Option[String] = innerNode(wanConnectionDeviceXml, "deviceType")
+        object WANIPConnection {
+          private val wanIPConnectionXml = serviceXml("urn:schemas-upnp-org:service:WANIPConnection")
+          val serviceType: Option[String] = innerNode(wanIPConnectionXml, "serviceType")
+          val controlURL: Option[String] = copyOrCatUrl(ipConDescURL, innerNode(wanIPConnectionXml, "controlURL"))
+          val eventSubURL: Option[String] = innerNode(wanIPConnectionXml, "eventSubURL")
+          val SCPDURL: Option[String] = copyOrCatUrl(ipConDescURL, innerNode(wanIPConnectionXml, "SCPDURL"))
+        }
+      }
+
     }
-	  
-	  object WANConnectionDevice {
-	    private val wanConnectionDeviceXml = deviceXml("urn:schemas-upnp-org:device:WANConnectionDevice")
-	    val deviceType: Option[String] = innerNode(wanConnectionDeviceXml,"deviceType")
-	    object WANIPConnection {
-	      private val wanIPConnectionXml = serviceXml("urn:schemas-upnp-org:service:WANIPConnection")
-	       val serviceType: Option[String] = innerNode(wanIPConnectionXml,"serviceType")
-           val controlURL: Option[String] = copyOrCatUrl(ipConDescURL,innerNode(wanIPConnectionXml,"controlURL"))
-           val eventSubURL: Option[String] = innerNode(wanIPConnectionXml,"eventSubURL")
-           val SCPDURL: Option[String] = copyOrCatUrl(ipConDescURL, innerNode(wanIPConnectionXml,"SCPDURL"))
-	    }
-	  }
-	  
   }
-  }
-     import RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
-   //  import RootDevice.WANDevice.WANCommonInterfaceConfig
+  import RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
+  //  import RootDevice.WANDevice.WANCommonInterfaceConfig
 
-    
-    
+  // WANIPConnection.SCPDURL = copyOrCatUrl(ipConDescURL, WANIPConnection.SCPDURL);
+  // WANIPConnection.controlURL = copyOrCatUrl(ipConDescURL, WANIPConnection.controlURL);
 
+  //  RootDevice.presentationURL = copyOrCatUrl(ipConDescURL, RootDevice.presentationURL);   
+  //WANCommonInterfaceConfig.controlURL = copyOrCatUrl(ipConDescURL, WANCommonInterfaceConfig.controlURL);
 
-   
-  
-   // WANIPConnection.SCPDURL = copyOrCatUrl(ipConDescURL, WANIPConnection.SCPDURL);
-    // WANIPConnection.controlURL = copyOrCatUrl(ipConDescURL, WANIPConnection.controlURL);
-   
-   
-      
-    //  RootDevice.presentationURL = copyOrCatUrl(ipConDescURL, RootDevice.presentationURL);   
-    //WANCommonInterfaceConfig.controlURL = copyOrCatUrl(ipConDescURL, WANCommonInterfaceConfig.controlURL);
-    
   //}
 
   /**
@@ -434,11 +424,11 @@ class GatewayDevice(val location:String,val st:Option[String], val localAddress 
   // private methods
 
   private def copyOrCatUrl(dstOption: Option[String], srcOption: Option[String]): Option[String] = {
-    srcOption.flatMap {src => 
-      if (src.startsWith("http://")) 
-         Some(src)
-       else 
-        dstOption.map( _ + (if (!src.startsWith("/")) "/" else "") + src );
+    srcOption.flatMap { src =>
+      if (src.startsWith("http://"))
+        Some(src)
+      else
+        dstOption.map(_ + (if (!src.startsWith("/")) "/" else "") + src);
     }
   }
 }
@@ -454,7 +444,7 @@ object GatewayDevice {
       args.map {
         case (key, value) => {
 
-          scala.xml.Elem(null, key, scala.xml.Null, scala.xml.TopScope, scala.xml.Text(value))
+          scala.xml.Elem(null, key, scala.xml.Null, TopScope, true, scala.xml.Text(value))
           // soapBody.append("<" + key + ">" + value + "</" + key + ">");
         }
         // }
@@ -464,41 +454,48 @@ object GatewayDevice {
     val header = Unparsed("""<?xml version="1.0"?>""")
     val soapBody = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
                      <SOAP-ENV:Body>
-                       { Elem("m", action.toString, Attribute("xmlns", "m", service, scala.xml.Null), TopScope, buildArgs: _*) }
+                       { Elem("m", action.toString, Attribute("xmlns", "m", service, scala.xml.Null), TopScope, true, buildArgs: _*) }
                      </SOAP-ENV:Body>
                    </SOAP-ENV:Envelope>;
     Group(List(header, soapBody)).toString();
   }
 
-  private def issueUPnpCommand(url: String, service: String, action: Commands.Value, args: Map[String, String])(doParse: InputSource => Map[String,String]): Map[String,String] = {
-    var soapAction: String = "\"" + service + "#" + action + "\""
+  private def issueUPnpCommand(url: String, service: String, action: Commands.Value, args: Map[String, String])(doParse: InputSource => Map[String, String]): Map[String, String] = {
+    val soapAction: String = "\"" + service + "#" + action + "\""
     //   val soapBody = new StringBuilder();
     //<m:{action} xmlns:m={ service }/>
     //    soapBody.append("" +
     val soapXmlBytes = makeSoap(action, args, service).getBytes();
 
     val postUrl = new URL(url);
-    val conn = postUrl.openConnection().asInstanceOf[HttpURLConnection];
 
-    conn.setRequestMethod("POST");
-    conn.setReadTimeout(HTTP_RECEIVE_TIMEOUT);
-    conn.setDoOutput(true);
-    conn.setRequestProperty("Content-Type", "text/xml");
-    conn.setRequestProperty("SOAPAction", soapAction);
-    conn.setRequestProperty("Connection", "Close");
+    try {
+      val conn = postUrl.openConnection().asInstanceOf[HttpURLConnection];
+      conn.setRequestMethod("POST");
+      conn.setReadTimeout(HTTP_RECEIVE_TIMEOUT);
+      conn.setDoOutput(true);
+      conn.setRequestProperty("Content-Type", "text/xml");
+      conn.setRequestProperty("SOAPAction", soapAction);
+      conn.setRequestProperty("Connection", "Close");
 
-    conn.setRequestProperty("Content-Length", String.valueOf(soapXmlBytes.length));
+      conn.setRequestProperty("Content-Length", String.valueOf(soapXmlBytes.length));
 
-    conn.getOutputStream().write(soapXmlBytes);
+      conn.getOutputStream().write(soapXmlBytes);
 
-    val stream = if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR)
-      conn.getErrorStream
-    else
-      conn.getInputStream
+      val stream = if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR)
+        conn.getErrorStream
+      else
+        conn.getInputStream
 
-   val mappedXml =  doParse(new InputSource(stream));
-    conn.disconnect();
-    mappedXml
+      val mappedXml = doParse(new InputSource(stream));
+      conn.disconnect();
+      mappedXml
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        Map.empty[String, String]
+    }
+
   }
 
   /**
@@ -520,22 +517,21 @@ object GatewayDevice {
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def simpleUPnPcommand(url: String, service: String, action: Commands.Value, args: Map[String, String]): Map[String, String] = {
-   
 
     //handles parsing the result of the UPnP command into a HashMap
-//    val parseIt: InputSource => Unit = { inputSource =>
-//      val parser = XMLReaderFactory.createXMLReader();
-//      parser.setContentHandler(new NameValueHandler(nameValue));
-//      try {
-//        parser.parse(inputSource);
-//      } catch {
-//        case e: SAXException => {}
-//        case e => throw e;
-//      }
-//    }
+    //    val parseIt: InputSource => Unit = { inputSource =>
+    //      val parser = XMLReaderFactory.createXMLReader();
+    //      parser.setContentHandler(new NameValueHandler(nameValue));
+    //      try {
+    //        parser.parse(inputSource);
+    //      } catch {
+    //        case e: SAXException => {}
+    //        case e => throw e;
+    //      }
+    //    }
 
-    issueUPnpCommand(url, service, action, args){inputSource =>       
-    	(XML.load(inputSource) \\ "_").map(x => (x.label, x.text) ).toMap
+    issueUPnpCommand(url, service, action, args) { inputSource =>
+      (XML.load(inputSource) \\ "_").map(x => (x.label, x.text)).toMap
     }
 
   }
@@ -567,7 +563,7 @@ object GatewayDevice {
   def simpleUPnPcommand_createFile(url: String, service: String, action: Commands.Value, args: Map[String, String], filename: String): Unit = {
 
     //handles parsing the result of the UPnP command into a file
-    val parseIt: InputSource => Map[String,String] = { inputSource =>
+    val parseIt: InputSource => Map[String, String] = { inputSource =>
       val body = new InputStreamReader(inputSource.getByteStream());
 
       var c: Int = 0;
@@ -585,7 +581,7 @@ object GatewayDevice {
           e.printStackTrace();
         }
       }
-      Map.empty[String,String]
+      Map.empty[String, String]
     }
 
     issueUPnpCommand(url, service, action, args)(parseIt)
