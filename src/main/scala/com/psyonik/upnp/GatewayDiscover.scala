@@ -1,7 +1,6 @@
 package com.psyonik.upnp
 import java.net.DatagramSocket
 import java.net.InetAddress
-import scala.actors.Actor
 import scala.collection.immutable.HashMap
 import java.net.InetSocketAddress
 import java.net.DatagramPacket
@@ -11,8 +10,6 @@ import java.io.IOException
 import javax.xml.parsers.ParserConfigurationException
 import org.xml.sax.SAXException
 import java.net.UnknownHostException
-import scala.collection.JavaConversions.asJavaMap
-import scala.collection.JavaConversions.asList
 import scala.collection.JavaConversions._
 import java.net.NetworkInterface
 import java.net.Inet4Address
@@ -99,7 +96,9 @@ object GatewayDiscover {
       Some((ssdp_try, discoveredGatewayDeviceOption))
 
     } catch {
-      case (e: Exception) ⇒ None;
+      case (e: Exception) ⇒
+      println(s"WARNING: EXCEPTION HIT: " + e.printStackTrace())
+      None;
     }
 
     ssdp.foreach(_._1.close); //close DatagramSocket

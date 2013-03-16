@@ -1,9 +1,6 @@
 package com.psyonik.upnp
 import org.specs2.mutable.Specification
-import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class GatewayDeviceUnitSpec extends Specification {
   val controlURLValue = "http://192.168.10.254:4444/wipconn";
   val serviceTypeValue = "urn:schemas-upnp-org:service:WANIPConnection:1";

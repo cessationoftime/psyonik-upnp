@@ -126,10 +126,10 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
       ipConDescURL = ipConDescURL.substring(0, lastSlashIndex);
     }
 
-    SCPDURL = Some(copyOrCatUrl(ipConDescURL, SCPDURL.get));
-    controlURL = Some(copyOrCatUrl(ipConDescURL, controlURL.get));
-    controlURLCIF = Some(copyOrCatUrl(ipConDescURL, controlURLCIF.get));
-    presentationURL = Some(copyOrCatUrl(ipConDescURL, presentationURL.get));
+    SCPDURL = copyOrCatUrl(ipConDescURL, SCPDURL);
+    controlURL = copyOrCatUrl(ipConDescURL, controlURL);
+    controlURLCIF = copyOrCatUrl(ipConDescURL, controlURLCIF);
+    presentationURL = copyOrCatUrl(ipConDescURL, presentationURL);
   }
 
   /**
@@ -391,20 +391,13 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
 
   // private methods
 
-  private def copyOrCatUrl(dst: String, src: String): String = {
-    var dstValue = dst;
-    var srcValue = src;
-    if (srcValue != null) {
-      if (srcValue.startsWith("http://")) {
-        dstValue = srcValue;
-      } else {
-        if (!srcValue.startsWith("/")) {
-          dstValue += "/";
-        }
-        dstValue += srcValue;
-      }
+  private def copyOrCatUrl(dst: String, srcOption: Option[String]): Option[String] = {
+    srcOption.map {src => 
+      if (src.startsWith("http://")) 
+         src
+       else 
+        dst + (if (!src.startsWith("/")) "/" else "") + src;
     }
-    return dstValue;
   }
 }
 object GatewayDevice {
