@@ -30,7 +30,7 @@ class GatewayDiscoverSpec extends Specification with Mockito {
               "\n\tPresentation URL: " + gw.RootDevice.presentationURL +
               "\n\tModel name: " + gw.RootDevice.modelName +
               "\n\tModel number: " + gw.RootDevice.modelNumber +
-              "\n\tLocal interface address: " + gw.localAddress.get.getHostAddress() + "\n" +
+              "\n\tLocal interface address: " + gw.localAddress.getHostAddress() + "\n" +
 			  "\n\tExternal interface address: " + gw.externalIPAddress + "\n");
           }
       }

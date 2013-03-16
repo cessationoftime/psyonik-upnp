@@ -6,9 +6,10 @@ import java.net.InetAddress
 import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
 import scala.collection.parallel.immutable.ParMap
-
 import scala.io.Source
-
+import scala.xml.Elem
+import scala.xml.NodeSeq
+import com.psyonik.upnp._
 
 class XmlParserSpec extends Specification with Mockito {
   args(sequential = true)
@@ -21,17 +22,18 @@ class XmlParserSpec extends Specification with Mockito {
     
     xmlFile.exists() mustEqual true
 
-    val bufferedSource = Source.fromFile(xmlFile)
+   // val bufferedSource = Source.fromFile(xmlFile)
     
   }
-
-    
-  
 
   "XmlParser" should {
 
     "be able to parse the xml" in new system {
-    pending
+      val xmlFromFile = scala.xml.XML.loadFile(xmlFile)
+      
+     (xmlFromFile \ "URLBase").textOption mustEqual None
+      (xmlFromFile \ "device" \ "manufacturer").textOption mustEqual Some("Cisco") 
+      
 
     }
 

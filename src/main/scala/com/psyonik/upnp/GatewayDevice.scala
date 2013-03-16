@@ -34,79 +34,13 @@ import java.io.InputStream
  * @author ses-jeff (scala)
  *
  */
-class GatewayDevice() {
-  import GatewayDevice.Commands._
-
-  var st: Option[String] = None;
-  var location: Option[String] = None;
-  //var serviceType: Option[String] = None;
-  
-  var urlBase: Option[String] = None;
-  
-  object RootDevice {
-  
-    /**
-   * The friendly (human readable) name associated with this device
-   */
-  var friendlyName: Option[String] = None;
-
-  /**
-   * The device manufacturer name
-   */
-  var manufacturer: Option[String] = None;
-
-  /**
-   * The model description as a string
-   */
-  var modelDescription: Option[String] = None;
-
-  /**
-   * The URL that can be used to access the IGD interface
-   */
-  var presentationURL: Option[String] = None;
-    
-    /**
-   * The model number (used by the manufacturer to identify the product)
-   */
-  var modelNumber: Option[String] = None;
-
-  /**
-   * The model name
-   */
-  var modelName: Option[String] = None;
-  
-  object WANDevice {
-    var deviceType: Option[String] = None;
-    object WANCommonInterfaceConfig { //CIF
-      var serviceType: Option[String] = None;
-	  var controlURL: Option[String] = None;
-	  var SCPDURL: Option[String] = None;
-	  var eventSubURL: Option[String] = None;
-    }
-	  
-	  object WANConnectionDevice {
-	    var deviceType: Option[String] = None;
-	    object WANIPConnection {
-	       var serviceType: Option[String] = None
-           var controlURL: Option[String] = None;
-           var eventSubURL: Option[String] = None
-           var SCPDURL: Option[String] = None;
-	    }
-	  }
-	  
-  }
-  }
-     import RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
-     import RootDevice.WANDevice.WANCommonInterfaceConfig
-
-  
-
-  /**
+  /** @param localAddress
    * The address used to reach this machine from the GatewayDevice
    */
-  var localAddress: Option[InetAddress] = None;
 
 
+class GatewayDevice(val location:String,val st:Option[String], val localAddress : InetAddress) {
+  import GatewayDevice.Commands._
 
   /**
    * Retrieves the properties and description of the GatewayDevice.
@@ -120,30 +54,31 @@ class GatewayDevice() {
    * @see org.bitlet.weupnpscala.GatewayDeviceHandler
    */
 
-  def parseXml(inputStream: InputStream) = {
-   val bufferedSource =  scala.io.Source.fromInputStream(inputStream)
-   bufferedSource.getLines foreach println
-  }
+//  def parseXml(inputStream: InputStream) = {
+//   val bufferedSource =  scala.io.Source.fromInputStream(inputStream)
+//   bufferedSource.getLines foreach println
+//  }
   
-  @throws(classOf[SAXException])
-  @throws(classOf[IOException])
-  def loadDescription() = {
+//  @throws(classOf[SAXException])
+//  @throws(classOf[IOException])
+//  def loadDescription() = {
     //TODO: Fix the use of options here.
     //Using all of them in a match statement won't work.
-    val urlConn: URLConnection = new URL(location.get).openConnection();
+    private val urlConn: URLConnection = new URL(location).openConnection();
     urlConn.setReadTimeout(GatewayDevice.HTTP_RECEIVE_TIMEOUT);
 
-    val parser: XMLReader = XMLReaderFactory.createXMLReader();
-    parser.setContentHandler(new GatewayDeviceHandler(this));
-    val inputStream = urlConn.getInputStream();
+   // val parser: XMLReader = XMLReaderFactory.createXMLReader();
+   // parser.setContentHandler(new GatewayDeviceHandler(this));
+    private val inputStream = urlConn.getInputStream();
   //  parseXml(inputStream);
     //parser.parse(new InputSource(urlConn.getInputStream()));
-    parser.parse(new InputSource(inputStream));
-
-    //This is why using all of them in a match statement won't work.
-    /* fix urls */
+  //  parser.parse(new InputSource(inputStream));
     
-   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(location).map{descUrl =>
+  private val xmlFromInputStream = scala.xml.XML.load(inputStream)
+  val urlBase: Option[String] = (xmlFromInputStream \ "URLBase").textOption
+
+      
+   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(Some(location)).map{descUrl =>
    		val lastSlashIndex: Int = descUrl.indexOf('/',7)
      
 	    if (lastSlashIndex > 0) {
@@ -151,18 +86,94 @@ class GatewayDevice() {
 	    } else descUrl
    
    }
+  
+  object RootDevice {
+   private val rootDeviceNodeSeq = (xmlFromInputStream \ "device")
+  
+    /**
+   * The friendly (human readable) name associated with this device
+   */
+  val friendlyName: Option[String] = (rootDeviceNodeSeq \ "friendlyName").textOption
+
+  /**
+   * The device manufacturer name
+   */
+  val manufacturer: Option[String] = (rootDeviceNodeSeq \ "manufacturer").textOption
+
+  /**
+   * The model description as a string
+   */
+  val modelDescription: Option[String] = (rootDeviceNodeSeq \ "modelDescription").textOption;
+
+  /**
+   * The URL that can be used to access the IGD interface
+   */
+  val presentationURL: Option[String] = copyOrCatUrl(ipConDescURL, (rootDeviceNodeSeq \ "presentationURL").textOption)
+    
+    /**
+   * The model number (used by the manufacturer to identify the product)
+   */
+  val modelNumber: Option[String] = (rootDeviceNodeSeq \ "modelNumber").textOption;
+
+  /**
+   * The model name
+   */
+  val modelName: Option[String] = (rootDeviceNodeSeq \ "modelName").textOption;
+  
+  private val allDevices = rootDeviceNodeSeq \\ "device"
+  
+  private val allServices = rootDeviceNodeSeq \\ "service"
+  
+  def deviceXml(deviceType: String) = allDevices.filter(d => (d \ "deviceType").text.contains(deviceType)).headOption
+  
+  def serviceXml(serviceType: String) = allServices.filter(d => (d \ "serviceType").text.contains(serviceType)).headOption
+  
+  def innerNode(nodeOption:Option[Node],name:String) = nodeOption.flatMap(x => (x \ name).textOption) 
+  
+  
+  object WANDevice {
+    private val wanDeviceXML = deviceXml("urn:schemas-upnp-org:device:WANDevice")
+    val deviceType: Option[String] = innerNode(wanDeviceXML,"deviceType")
+    object WANCommonInterfaceConfig { //CIF
+      private val wanCommonInterfaceConfigXml = serviceXml("urn:schemas-upnp-org:service:WANCommonInterfaceConfig")
+      val serviceType: Option[String] = innerNode(wanCommonInterfaceConfigXml,"serviceType")
+	  val controlURL: Option[String] =  copyOrCatUrl(ipConDescURL, innerNode(wanCommonInterfaceConfigXml,"controlURL"))
+	  val eventSubURL: Option[String] = innerNode(wanCommonInterfaceConfigXml,"eventSubURL")
+	  val SCPDURL: Option[String] = innerNode(wanCommonInterfaceConfigXml,"SCPDURL")
+    }
+	  
+	  object WANConnectionDevice {
+	    private val wanConnectionDeviceXml = deviceXml("urn:schemas-upnp-org:device:WANConnectionDevice")
+	    val deviceType: Option[String] = innerNode(wanConnectionDeviceXml,"deviceType")
+	    object WANIPConnection {
+	      private val wanIPConnectionXml = serviceXml("urn:schemas-upnp-org:service:WANIPConnection")
+	       val serviceType: Option[String] = innerNode(wanIPConnectionXml,"serviceType")
+           val controlURL: Option[String] = copyOrCatUrl(ipConDescURL,innerNode(wanIPConnectionXml,"controlURL"))
+           val eventSubURL: Option[String] = innerNode(wanIPConnectionXml,"eventSubURL")
+           val SCPDURL: Option[String] = copyOrCatUrl(ipConDescURL, innerNode(wanIPConnectionXml,"SCPDURL"))
+	    }
+	  }
+	  
+  }
+  }
+     import RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
+   //  import RootDevice.WANDevice.WANCommonInterfaceConfig
+
+    
+    
+
 
    
   
-    WANIPConnection.SCPDURL = copyOrCatUrl(ipConDescURL, WANIPConnection.SCPDURL);
-     WANIPConnection.controlURL = copyOrCatUrl(ipConDescURL, WANIPConnection.controlURL);
+   // WANIPConnection.SCPDURL = copyOrCatUrl(ipConDescURL, WANIPConnection.SCPDURL);
+    // WANIPConnection.controlURL = copyOrCatUrl(ipConDescURL, WANIPConnection.controlURL);
    
    
       
-      RootDevice.presentationURL = copyOrCatUrl(ipConDescURL, RootDevice.presentationURL);   
-    WANCommonInterfaceConfig.controlURL = copyOrCatUrl(ipConDescURL, WANCommonInterfaceConfig.controlURL);
+    //  RootDevice.presentationURL = copyOrCatUrl(ipConDescURL, RootDevice.presentationURL);   
+    //WANCommonInterfaceConfig.controlURL = copyOrCatUrl(ipConDescURL, WANCommonInterfaceConfig.controlURL);
     
-  }
+  //}
 
   /**
    * Retrieves the connection status of this device

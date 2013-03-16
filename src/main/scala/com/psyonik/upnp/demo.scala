@@ -34,7 +34,7 @@ object Main extends App {
           "\n\tPresentation URL: " + gw.RootDevice.presentationURL +
           "\n\tModel name: " + gw.RootDevice.modelName +
           "\n\tModel number: " + gw.RootDevice.modelNumber +
-          "\n\tLocal interface address: " + gw.localAddress.get.getHostAddress() + "\n");
+          "\n\tLocal interface address: " + gw.localAddress.getHostAddress() + "\n");
       }
   }
 
@@ -65,7 +65,7 @@ object Main extends App {
   activeGW.getAllPortMappingEntriesOf("psyonik") foreach (x => println("Portmapping retrieved (" + x.portMappingDescription + ":" + x.externalPort + ")"));
 
   val localAddress = activeGW.localAddress;
-  println("Using local address: " + localAddress.get.getHostAddress());
+  println("Using local address: " + localAddress.getHostAddress());
   val externalIPAddress = activeGW.externalIPAddress;
   println("External address: " + externalIPAddress);
 
@@ -78,7 +78,7 @@ object Main extends App {
     case None =>
       println("Mapping free. Sending port mapping request for port " + SAMPLE_PORT);
 
-      if (activeGW.addPortMapping(SAMPLE_PORT, SAMPLE_PORT, localAddress.get.getHostAddress(), "TCP", "test")) {
+      if (activeGW.addPortMapping(SAMPLE_PORT, SAMPLE_PORT, localAddress.getHostAddress(), "TCP", "test")) {
         println("Mapping Successful. Waiting " + WAIT_TIME + " seconds before removing mapping...");
         Thread.sleep(1009 * WAIT_TIME);
 
