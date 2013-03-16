@@ -96,7 +96,9 @@ object GatewayDiscover {
       Some((ssdp_try, discoveredGatewayDeviceOption))
 
     } catch {
-      case (e: Exception) ⇒ None;
+      case (e: Exception) ⇒
+      println(s"WARNING: EXCEPTION HIT: " + e.printStackTrace())
+      None;
     }
 
     ssdp.foreach(_._1.close); //close DatagramSocket
