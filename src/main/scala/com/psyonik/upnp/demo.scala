@@ -30,10 +30,10 @@ object Main extends App {
       {
         counter = counter + 1;
         println("Listing gateway details of device #" + counter +
-          "\n\tFriendly name: " + gw.friendlyName +
-          "\n\tPresentation URL: " + gw.presentationURL +
-          "\n\tModel name: " + gw.modelName +
-          "\n\tModel number: " + gw.modelNumber +
+          "\n\tFriendly name: " + gw.RootDevice.friendlyName +
+          "\n\tPresentation URL: " + gw.RootDevice.presentationURL +
+          "\n\tModel name: " + gw.RootDevice.modelName +
+          "\n\tModel number: " + gw.RootDevice.modelNumber +
           "\n\tLocal interface address: " + gw.localAddress.get.getHostAddress() + "\n");
       }
   }
@@ -41,7 +41,7 @@ object Main extends App {
   val activeGWOption = gateways.getValidGateway();
 
   activeGWOption match {
-    case Some(gw) => println("Using gateway: " + gw.friendlyName);
+    case Some(gw) => println("Using gateway: " + gw.RootDevice.friendlyName);
     case None =>
       println("No active gateway device found");
       println("exiting");

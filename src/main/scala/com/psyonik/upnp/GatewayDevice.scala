@@ -34,25 +34,18 @@ import java.io.InputStream
  * @author ses-jeff (scala)
  *
  */
-class GatewayDevice(var controlURL: Option[String], var serviceType: Option[String]) {
+class GatewayDevice() {
   import GatewayDevice.Commands._
-  def this() = this(None, None)
 
   var st: Option[String] = None;
   var location: Option[String] = None;
   //var serviceType: Option[String] = None;
-  var serviceTypeCIF: Option[String] = None;
+  
   var urlBase: Option[String] = None;
-  //var controlURL: Option[String] = None;
-  var controlURLCIF: Option[String] = None;
-  var eventSubURL: Option[String] = None;
-  var eventSubURLCIF: Option[String] = None;
-  var SCPDURL: Option[String] = None;
-  var SCPDURLCIF: Option[String] = None;
-  var deviceType: Option[String] = None;
-  var deviceTypeCIF: Option[String] = None;
-
-  /**
+  
+  object RootDevice {
+  
+    /**
    * The friendly (human readable) name associated with this device
    */
   var friendlyName: Option[String] = None;
@@ -71,13 +64,8 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
    * The URL that can be used to access the IGD interface
    */
   var presentationURL: Option[String] = None;
-
-  /**
-   * The address used to reach this machine from the GatewayDevice
-   */
-  var localAddress: Option[InetAddress] = None;
-
-  /**
+    
+    /**
    * The model number (used by the manufacturer to identify the product)
    */
   var modelNumber: Option[String] = None;
@@ -86,6 +74,39 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
    * The model name
    */
   var modelName: Option[String] = None;
+  
+  object WANDevice {
+    var deviceType: Option[String] = None;
+    object WANCommonInterfaceConfig { //CIF
+      var serviceType: Option[String] = None;
+	  var controlURL: Option[String] = None;
+	  var SCPDURL: Option[String] = None;
+	  var eventSubURL: Option[String] = None;
+    }
+	  
+	  object WANConnectionDevice {
+	    var deviceType: Option[String] = None;
+	    object WANIPConnection {
+	       var serviceType: Option[String] = None
+           var controlURL: Option[String] = None;
+           var eventSubURL: Option[String] = None
+           var SCPDURL: Option[String] = None;
+	    }
+	  }
+	  
+  }
+  }
+     import RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
+     import RootDevice.WANDevice.WANCommonInterfaceConfig
+
+  
+
+  /**
+   * The address used to reach this machine from the GatewayDevice
+   */
+  var localAddress: Option[InetAddress] = None;
+
+
 
   /**
    * Retrieves the properties and description of the GatewayDevice.
@@ -122,34 +143,25 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     //This is why using all of them in a match statement won't work.
     /* fix urls */
     
-   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(location)
+   val ipConDescURL = urlBase.filter(_.trim.length > 0).orElse(location).map{descUrl =>
+   		val lastSlashIndex: Int = descUrl.indexOf('/',7)
      
-//     if (urlBase.isDefined && urlBase.get.trim().length() > 0) {
-//       urlBase.get;
-//    } else {
-//       location.get;
-//    }
-
-   .map{descUrl =>
-   val lastSlashIndex: Int = descUrl.indexOf('/',7)
-     
-    if (lastSlashIndex > 0) {
-      descUrl.substring(0, lastSlashIndex);
-    } else descUrl
+	    if (lastSlashIndex > 0) {
+	      descUrl.substring(0, lastSlashIndex);
+	    } else descUrl
    
    }
-   
-   
-   
-   // val lastSlashIndex: Int = ipConDescURL.get.indexOf('/', 7);
-//    if (lastSlashIndex > 0) {
-//      ipConDescURL = ipConDescURL.substring(0, lastSlashIndex);
-//    }
 
-    SCPDURL = copyOrCatUrl(ipConDescURL, SCPDURL);
-    controlURL = copyOrCatUrl(ipConDescURL, controlURL);
-    controlURLCIF = copyOrCatUrl(ipConDescURL, controlURLCIF);
-    presentationURL = copyOrCatUrl(ipConDescURL, presentationURL);
+   
+  
+    WANIPConnection.SCPDURL = copyOrCatUrl(ipConDescURL, WANIPConnection.SCPDURL);
+     WANIPConnection.controlURL = copyOrCatUrl(ipConDescURL, WANIPConnection.controlURL);
+   
+   
+      
+      RootDevice.presentationURL = copyOrCatUrl(ipConDescURL, RootDevice.presentationURL);   
+    WANCommonInterfaceConfig.controlURL = copyOrCatUrl(ipConDescURL, WANCommonInterfaceConfig.controlURL);
+    
   }
 
   /**
@@ -164,7 +176,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   lazy val isConnected: Boolean = {
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) => {
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetStatusInfo);
@@ -197,7 +209,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[SAXException])
   lazy val externalIPAddress: Option[String] = {
     //TODO: Print out if controlUrl or ServiceType are None.
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) => {
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetExternalIPAddress);
@@ -230,7 +242,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   def addPortMapping(externalPort: Int, internalPort: Int,
     internalClient: String, protocol: String, description: String, leaseDuration: Int = 0): Boolean = {
     //TODO: Print out if controlUrl or ServiceType are None.
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map("NewRemoteHost" -> "", //wildcard, any remote host matches
           "NewExternalPort" -> Integer.toString(externalPort),
@@ -305,7 +317,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   def getSpecificPortMappingEntry(externalPort: Int,
     protocol: String): Option[PortMappingEntry] = {
 
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map(
           "NewRemoteHost" -> "", // wildcard, any remote host matches
@@ -345,7 +357,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
     //TODO: There appears to be a lot of reuse from getSpecificPortMappingEntry.
     //Combine the two methods to a degree?
 
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         var args: Map[String, String] = Map("NewPortMappingIndex" -> Integer.toString(index));
 
@@ -370,7 +382,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def getPortMappingNumberOfEntries(): Int = {
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetPortMappingNumberOfEntries);
@@ -396,7 +408,7 @@ class GatewayDevice(var controlURL: Option[String], var serviceType: Option[Stri
   def deletePortMapping(externalPort: Int, protocol: String): Boolean = {
     //TODO: You know, this doesn't actually confirm that it worked...
     //It just kind of returns true if it tried to do it.
-    (controlURL, serviceType) match {
+    (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
         val args: Map[String, String] = Map(
           "NewRemoteHost" -> "",

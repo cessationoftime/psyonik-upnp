@@ -6,10 +6,17 @@ import org.xml.sax.helpers.DefaultHandler
 
 class GatewayDeviceHandler(device: GatewayDevice) extends DefaultHandler {
 
+  import device.RootDevice
+  import device.RootDevice.WANDevice
+  import device.RootDevice.WANDevice.WANConnectionDevice
+  import device.RootDevice.WANDevice.WANConnectionDevice.WANIPConnection
+  import device.RootDevice.WANDevice.WANCommonInterfaceConfig
+  
   private var currentElement: Option[String] = None;
   private var level: Int = 0;
   private var state: Short = 0;
 
+  
   /** Receive notification of the start of an element.
     *
     * Caches the element as {@link #currentElement}, and keeps track of some
@@ -66,11 +73,11 @@ class GatewayDeviceHandler(device: GatewayDevice) extends DefaultHandler {
     currentElement = Some("")
     level -= 1;
     if (localName.compareTo("service") == 0) {
-      if (device.serviceTypeCIF.isDefined &&
-        device.serviceTypeCIF.get.compareTo("urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1") == 0)
+      if (WANCommonInterfaceConfig.serviceType.isDefined &&
+        WANCommonInterfaceConfig.serviceType.get.compareTo("urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1") == 0)
         state = 2;
-      if (device.serviceType.isDefined &&
-        device.serviceType.get.compareTo("urn:schemas-upnp-org:service:WANIPConnection:1") == 0)
+      if (WANIPConnection.serviceType.isDefined &&
+        WANIPConnection.serviceType.get.compareTo("urn:schemas-upnp-org:service:WANIPConnection:1") == 0)
         state = 3;
     }
   }
@@ -96,39 +103,39 @@ class GatewayDeviceHandler(device: GatewayDevice) extends DefaultHandler {
     else if (state <= 1) {
       if (state == 0) {
         if ("friendlyName".compareTo(currentElement.get) == 0)
-          device.friendlyName = s;
+          RootDevice.friendlyName = s;
         else if ("manufacturer".compareTo(currentElement.get) == 0)
-          device.manufacturer = s;
+          RootDevice.manufacturer = s;
         else if ("modelDescription".compareTo(currentElement.get) == 0)
-          device.modelDescription = s;
+          RootDevice.modelDescription = s;
         else if ("presentationURL".compareTo(currentElement.get) == 0)
-          device.presentationURL = s;
+          RootDevice.presentationURL = s;
         else if ("modelNumber".compareTo(currentElement.get) == 0)
-          device.modelNumber = s;
+          RootDevice.modelNumber = s;
         else if ("modelName".compareTo(currentElement.get) == 0)
-          device.modelName = s;
+          RootDevice.modelName = s;
       }
       if (currentElement.get.compareTo("serviceType") == 0)
-        device.serviceTypeCIF = s;
+        WANCommonInterfaceConfig.serviceType = s;
       else if (currentElement.get.compareTo("controlURL") == 0)
-        device.controlURLCIF = s;
+        WANCommonInterfaceConfig.controlURL = s;
       else if (currentElement.get.compareTo("eventSubURL") == 0)
-        device.eventSubURLCIF = s;
+        WANCommonInterfaceConfig.eventSubURL = s;
       else if (currentElement.get.compareTo("SCPDURL") == 0)
-        device.SCPDURLCIF = s;
+        WANCommonInterfaceConfig.SCPDURL = s;
       else if (currentElement.get.compareTo("deviceType") == 0)
-        device.deviceTypeCIF = s;
+        WANDevice.deviceType = s;
     } else if (state == 2) {
       if (currentElement.get.compareTo("serviceType") == 0)
-        device.serviceType = s;
+        WANIPConnection.serviceType = s;
       else if (currentElement.get.compareTo("controlURL") == 0)
-        device.controlURL = s;
+        WANIPConnection.controlURL = s;
       else if (currentElement.get.compareTo("eventSubURL") == 0)
-        device.eventSubURL = s;
+        WANIPConnection.eventSubURL = s;
       else if (currentElement.get.compareTo("SCPDURL") == 0)
-        device.SCPDURL = s;
+        WANIPConnection.SCPDURL = s;
       else if (currentElement.get.compareTo("deviceType") == 0)
-        device.deviceType = s;
+        WANConnectionDevice.deviceType = s;
 
     }
   }

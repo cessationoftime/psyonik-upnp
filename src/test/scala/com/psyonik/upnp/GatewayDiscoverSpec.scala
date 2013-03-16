@@ -26,10 +26,10 @@ class GatewayDiscoverSpec extends Specification with Mockito {
             counter = counter + 1;
           
             println("Listing gateway details of device #" + counter +
-              "\n\tFriendly name: " + gw.friendlyName +
-              "\n\tPresentation URL: " + gw.presentationURL +
-              "\n\tModel name: " + gw.modelName +
-              "\n\tModel number: " + gw.modelNumber +
+              "\n\tFriendly name: " + gw.RootDevice.friendlyName +
+              "\n\tPresentation URL: " + gw.RootDevice.presentationURL +
+              "\n\tModel name: " + gw.RootDevice.modelName +
+              "\n\tModel number: " + gw.RootDevice.modelNumber +
               "\n\tLocal interface address: " + gw.localAddress.get.getHostAddress() + "\n" +
 			  "\n\tExternal interface address: " + gw.externalIPAddress + "\n");
           }
