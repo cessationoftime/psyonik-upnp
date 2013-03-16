@@ -72,7 +72,7 @@ object GatewayDiscover {
           Array.copy(receivePacket.getData(), 0, receivedData, 0, receivePacket.getLength);
           // println("Copied. Parsing.")
           
-          val locationOption = parseMSearchReply(receivedData);
+          val (locationOption,deviceSearchTargetOption) = parseMSearchReply(receivedData);
           val gateDev: Option[GatewayDevice] = locationOption.map(location => new GatewayDevice(location,localAddress));
 
           // println("Loading description.")
@@ -165,12 +165,12 @@ object GatewayDiscover {
     return devs.toMap
   }
 
-  def parseMSearchReply(reply: Array[Byte]): Option[String] = {
+  def parseMSearchReply(reply: Array[Byte]): (Option[String],Option[String] ) = {
     val replyString: String = new String(reply);
     val st: StringTokenizer = new StringTokenizer(replyString, "\n");
 
     var deviceLocation : Option[String] = None
-    var deviceSt : Option[String] = None
+    var deviceSearchTarget : Option[String] = None
     
     while (st.hasMoreTokens()) {
       val line: String = st.nextToken().trim();
@@ -186,12 +186,12 @@ object GatewayDiscover {
           deviceLocation = trimmedValue;
 
         } else if (key.compareToIgnoreCase("st") == 0) { // Search Target
-          deviceSt = trimmedValue;
+          deviceSearchTarget = trimmedValue;
         }
       }
     }
 
-    return deviceLocation;
+    return (deviceLocation,deviceSearchTarget);
 
   }
 

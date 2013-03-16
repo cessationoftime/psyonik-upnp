@@ -359,7 +359,7 @@ class GatewayDevice(val location: String, val localAddress: InetAddress) {
 
     (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
       case (Some(controlURLValue), Some(serviceTypeValue)) =>
-        var args: Map[String, String] = Map("NewPortMappingIndex" -> Integer.toString(index));
+        val args: Map[String, String] = Map("NewPortMappingIndex" -> Integer.toString(index));
 
         val nameValue: Map[String, String] = GatewayDevice.simpleUPnPcommand(controlURLValue,
           serviceTypeValue, GetGenericPortMappingEntry, args);
