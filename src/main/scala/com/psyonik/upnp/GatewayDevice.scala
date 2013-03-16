@@ -23,6 +23,7 @@ import scala.xml.TopScope
 import scala.xml.NodeSeq
 import scala.xml.Node
 import java.io.InputStream
+import scala.xml.XML
 
 /**
  * A <tt>GatewayDevice</tt> is a class that abstracts UPnP-compliant gateways
@@ -216,8 +217,6 @@ class GatewayDevice(val location:String,val st:Option[String], val localAddress 
    * @see #simpleUPnPcommand(java.lang.String, java.lang.String,
    * java.lang.String, java.util.Map)
    */
-  @throws(classOf[IOException])
-  @throws(classOf[SAXException])
   lazy val externalIPAddress: Option[String] = {
     //TODO: Print out if controlUrl or ServiceType are None.
     (WANIPConnection.controlURL, WANIPConnection.serviceType) match {
@@ -471,7 +470,7 @@ object GatewayDevice {
     Group(List(header, soapBody)).toString();
   }
 
-  private def issueUPnpCommand(url: String, service: String, action: Commands.Value, args: Map[String, String], doParse: InputSource => Unit): Unit = {
+  private def issueUPnpCommand(url: String, service: String, action: Commands.Value, args: Map[String, String])(doParse: InputSource => Map[String,String]): Map[String,String] = {
     var soapAction: String = "\"" + service + "#" + action + "\""
     //   val soapBody = new StringBuilder();
     //<m:{action} xmlns:m={ service }/>
@@ -497,8 +496,9 @@ object GatewayDevice {
     else
       conn.getInputStream
 
-    doParse(new InputSource(stream));
+   val mappedXml =  doParse(new InputSource(stream));
     conn.disconnect();
+    mappedXml
   }
 
   /**
@@ -520,23 +520,24 @@ object GatewayDevice {
   @throws(classOf[IOException])
   @throws(classOf[SAXException])
   def simpleUPnPcommand(url: String, service: String, action: Commands.Value, args: Map[String, String]): Map[String, String] = {
-    val nameValue = new scala.collection.mutable.HashMap[String, String];
+   
 
     //handles parsing the result of the UPnP command into a HashMap
-    val parseIt: InputSource => Unit = { inputSource =>
-      val parser = XMLReaderFactory.createXMLReader();
-      parser.setContentHandler(new NameValueHandler(nameValue));
-      try {
-        parser.parse(inputSource);
-      } catch {
-        case e: SAXException => {}
-        case e => throw e;
-      }
+//    val parseIt: InputSource => Unit = { inputSource =>
+//      val parser = XMLReaderFactory.createXMLReader();
+//      parser.setContentHandler(new NameValueHandler(nameValue));
+//      try {
+//        parser.parse(inputSource);
+//      } catch {
+//        case e: SAXException => {}
+//        case e => throw e;
+//      }
+//    }
+
+    issueUPnpCommand(url, service, action, args){inputSource =>       
+    	(XML.load(inputSource) \\ "_").map(x => (x.label, x.text) ).toMap
     }
 
-    issueUPnpCommand(url, service, action, args, parseIt)
-
-    return nameValue.toMap;
   }
 
   /**
@@ -566,7 +567,7 @@ object GatewayDevice {
   def simpleUPnPcommand_createFile(url: String, service: String, action: Commands.Value, args: Map[String, String], filename: String): Unit = {
 
     //handles parsing the result of the UPnP command into a file
-    val parseIt: InputSource => Unit = { inputSource =>
+    val parseIt: InputSource => Map[String,String] = { inputSource =>
       val body = new InputStreamReader(inputSource.getByteStream());
 
       var c: Int = 0;
@@ -584,9 +585,10 @@ object GatewayDevice {
           e.printStackTrace();
         }
       }
+      Map.empty[String,String]
     }
 
-    issueUPnpCommand(url, service, action, args, parseIt)
+    issueUPnpCommand(url, service, action, args)(parseIt)
   }
 
 }

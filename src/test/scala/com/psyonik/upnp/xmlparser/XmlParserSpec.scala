@@ -13,34 +13,57 @@ import com.psyonik.upnp._
 
 class XmlParserSpec extends Specification with Mockito {
   args(sequential = true)
-  
+
   val testFilePath = "src/test/resources/com/psyonik/upnp/xmlparser/"
-  
 
   trait system extends Scope {
-    val xmlFile = new java.io.File(testFilePath + "InternetGatewayDevice.xml")
-    
-    xmlFile.exists() mustEqual true
+    val internetGatewayDevice = new java.io.File(testFilePath + "InternetGatewayDevice.xml")
+    val getExternalIPAddress = new java.io.File(testFilePath + "GetExternalIPAddress.xml")
+    val getStatusInfo = new java.io.File(testFilePath + "GetStatusInfo.xml")
 
-   // val bufferedSource = Source.fromFile(xmlFile)
-    
+    internetGatewayDevice.exists() mustEqual true
+    getExternalIPAddress.exists() mustEqual true
+    getStatusInfo.exists() mustEqual true
+
+    // val bufferedSource = Source.fromFile(xmlFile)
+
   }
 
   "XmlParser" should {
 
     "be able to parse the xml" in new system {
-      val xmlFromFile = scala.xml.XML.loadFile(xmlFile)
-      
-     (xmlFromFile \ "URLBase").textOption mustEqual None
-      (xmlFromFile \ "device" \ "manufacturer").textOption mustEqual Some("Cisco") 
-      
+      val internetGatewayDeviceXml = scala.xml.XML.loadFile(internetGatewayDevice)
+
+      (internetGatewayDeviceXml \ "URLBase").textOption mustEqual None
+      (internetGatewayDeviceXml \ "device" \ "manufacturer").textOption mustEqual Some("Cisco")
 
     }
 
-     "be able to parse if an element is missing" in new system {
-  pending
-    }
+  }
 
+  "NameValueHandler" should {
+    "properly handle parsing the test GetStatusInfo.xml file" in new system {
+      val getStatusInfoXml = scala.xml.XML.loadFile(getStatusInfo)
+      
+    val nameValue =  (getStatusInfoXml \\ "_").map(x => (x.label, x.text) ).toMap
+      
+
+            val t = nameValue.get("NewConnectionStatus").
+              filter(_.equalsIgnoreCase("Connected")).
+              map(_ ⇒ true)
+            t.getOrElse(false) mustEqual true
+      
+            nameValue("NewLastConnectionError") mustEqual "ERROR_NONE"
+            nameValue("NewUptime") mustEqual "1312938"
+    }
+    "properly handle parsing the test GetExternalIPAddress.xml file" in new system {
+        val getExternalIPAddressXml = scala.xml.XML.loadFile(getExternalIPAddress)
+
+        val nameValue =  (getExternalIPAddressXml \\ "_").map(x => (x.label, x.text) ).toMap
+
+         nameValue("NewExternalIPAddress") mustEqual "74.77.125.7"
+      
+    }
   }
 
 }

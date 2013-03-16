@@ -210,8 +210,8 @@ object GatewayDiscover {
         val n = NetworkInterface.getNetworkInterfaces
         if (n == null) Nil else n.toSeq;
       } catch {
-        case (e: SocketException) ⇒ Nil
-        case e ⇒ throw new RuntimeException(e)
+       // case (e: SocketException) ⇒ Nil
+        case e : Exception => e.printStackTrace(); Nil
       }
     }
 
@@ -228,8 +228,8 @@ object GatewayDiscover {
             a.toList
         }
       } catch {
-        case (e: SocketException) ⇒ return Nil;
-        case e ⇒ throw new RuntimeException(e)
+        //case (e: SocketException) ⇒ return Nil;
+          case e : Exception => e.printStackTrace(); Nil
       }
 
     }
